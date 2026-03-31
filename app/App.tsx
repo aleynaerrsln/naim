@@ -150,6 +150,7 @@ export default function App() {
   const [newCatName, setNewCatName] = useState('');
   const [newCatIcon, setNewCatIcon] = useState('📝');
   const [isRecording, setIsRecording] = useState(false);
+  const [fullImage, setFullImage] = useState<string | null>(null);
   const [isDark, setIsDark] = useState(true);
   const [lang, setLang] = useState<Lang>('tr');
   const t = isDark ? themes.dark : themes.light;
@@ -629,6 +630,18 @@ export default function App() {
 
   // ========== VIEW SCREEN ==========
   if (screen === 'view' && viewingNote) {
+    if (fullImage) {
+      return (
+        <View style={styles.fullImageContainer}>
+          <StatusBar style="light" />
+          <Image source={{ uri: fullImage }} style={styles.fullImage} resizeMode="contain" />
+          <TouchableOpacity style={styles.fullImageClose} onPress={() => setFullImage(null)}>
+            <Text style={styles.fullImageCloseText}>✕</Text>
+          </TouchableOpacity>
+        </View>
+      );
+    }
+
     return (
       <SafeAreaView style={[styles.container, { backgroundColor: t.bg }]}>
         <StatusBar style={t.statusBar} />
@@ -647,7 +660,9 @@ export default function App() {
           </View>
           <View style={styles.viewContent}>
             {viewingNote.image && (
-              <Image source={{ uri: viewingNote.image }} style={styles.viewImage} />
+              <TouchableOpacity onPress={() => setFullImage(viewingNote.image!)}>
+                <Image source={{ uri: viewingNote.image }} style={styles.viewImage} />
+              </TouchableOpacity>
             )}
             <Text style={[styles.viewTitle, { color: t.accent }]}>{viewingNote.title || l.untitled}</Text>
             <Text style={[styles.viewText, { color: t.text }]}>{viewingNote.text}</Text>
@@ -659,12 +674,14 @@ export default function App() {
               </View>
             )}
           </View>
-          <TouchableOpacity
-            style={styles.deleteBottomButton}
-            onPress={() => handleDelete(viewingNote.id)}
-          >
-            <Text style={styles.deleteBottomText}>{l.delete}</Text>
-          </TouchableOpacity>
+          <View style={{ paddingHorizontal: 28, marginTop: 30 }}>
+            <TouchableOpacity
+              style={styles.deleteBottomButton}
+              onPress={() => handleDelete(viewingNote.id)}
+            >
+              <Text style={styles.deleteBottomText}>{l.delete}</Text>
+            </TouchableOpacity>
+          </View>
         </ScrollView>
       </SafeAreaView>
     );
@@ -1645,6 +1662,33 @@ const styles = StyleSheet.create({
     fontSize: 13,
   },
 
+  // ===== FULL IMAGE =====
+  fullImageContainer: {
+    flex: 1,
+    backgroundColor: '#000',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  fullImage: {
+    width: '100%',
+    height: '100%',
+  },
+  fullImageClose: {
+    position: 'absolute',
+    top: 50,
+    right: 20,
+    backgroundColor: '#00000088',
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  fullImageCloseText: {
+    color: '#fff',
+    fontSize: 18,
+  },
+
   // ===== IMAGE =====
   noteImage: {
     width: 50,
@@ -1731,17 +1775,18 @@ const styles = StyleSheet.create({
     lineHeight: 28,
   },
   deleteBottomButton: {
-    marginHorizontal: 28,
-    marginBottom: 40,
-    paddingVertical: 14,
-    borderRadius: 14,
-    borderWidth: 1,
-    borderColor: '#e05555',
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 12,
+    backgroundColor: '#e0555515',
+    alignSelf: 'center',
+    flexDirection: 'row',
     alignItems: 'center',
+    gap: 6,
   },
   deleteBottomText: {
     color: '#e05555',
-    fontSize: 15,
+    fontSize: 14,
     fontWeight: '600',
   },
 
