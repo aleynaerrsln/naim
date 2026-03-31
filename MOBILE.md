@@ -18,9 +18,9 @@
 
 | Metric | Value |
 |--------|-------|
-| Total Iterations | 18 |
-| Total Weight (kg) | 240 |
-| Total Time (min) | 270 |
+| Total Iterations | 20 |
+| Total Weight (kg) | 265 |
+| Total Time (min) | 300 |
 | Failed Attempts | 0 |
 
 ---
@@ -503,6 +503,58 @@ modern profil kartı, gruplu kartlar ile yeniden tasarla.
 **Screenshot:** `[Expo Go'dan ekran görüntüsü ekle]`
 
 **Commit:** `[NAIM: Aleyna Pocket Belle] Added Apple Notes style folders UI - 10kg`
+
+---
+
+### 🏋️ Iteration 19
+
+| Field | Value |
+|-------|-------|
+| Feature | `Voice input — audio recording with playback in notes` |
+| Weight | `15 kg` |
+| Tool Used | `Claude Code + expo-audio` |
+| Time | `15 min` |
+| Attempts | `4` |
+| Status | ✅ Success |
+
+**Prompt given to AI:**
+```
+Iteration 19: Sesli not kaydetme. Mikrofon ile ses kaydet, nota ekle,
+not kartında ve detayda dinleme butonu. expo-audio kullan.
+```
+
+**What happened:**
+- expo-audio useAudioRecorder ile ses kaydı eklendi. iOS'ta setAudioModeAsync ile izin ayarlandı. Not kartlarında ▶️ dinleme butonu, detayda büyük dinleme butonu. Geri basınca otomatik kaydetme.
+
+**Screenshot:** `[Expo Go'dan ekran görüntüsü ekle]`
+
+**Commit:** `[NAIM: Aleyna Pocket Belle] Added voice recording and AI report generation - 40kg`
+
+---
+
+### 🏋️ Iteration 20
+
+| Field | Value |
+|-------|-------|
+| Feature | `App generates its own documentation — AI report` |
+| Weight | `25 kg` |
+| Tool Used | `Claude Code` |
+| Time | `15 min` |
+| Attempts | `1` |
+| Status | ✅ Success |
+
+**Prompt given to AI:**
+```
+Iteration 20: Belle tüm notları analiz edip özet rapor oluştursun.
+Menüde rapor butonu. Ruh hali eğilimi, konu analizi, kişisel mesaj.
+```
+
+**What happened:**
+- Menüye "Günlük Raporu Oluştur" butonu eklendi. Belle tüm notları analiz edip ruh hali dağılımı, konu özeti ve kişisel mesaj içeren rapor oluşturuyor. Lokal AI analiz ile anında çalışıyor.
+
+**Screenshot:** `[Expo Go'dan ekran görüntüsü ekle]`
+
+**Commit:** `[NAIM: Aleyna Pocket Belle] Added voice recording and AI report generation - 40kg`
 
 ---
 

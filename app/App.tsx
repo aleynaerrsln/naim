@@ -19,8 +19,9 @@ import {
 import Svg, { Path } from 'react-native-svg';
 import * as ImagePicker from 'expo-image-picker';
 import { Image } from 'react-native';
+import { useAudioRecorder, RecordingPresets, setAudioModeAsync, useAudioPlayer } from 'expo-audio';
 import BelleRose from './components/BelleRose';
-import { analyzeNote, AIResponse } from './utils/gemini';
+import { analyzeNote, AIResponse, generateReportText } from './utils/gemini';
 import { translations, Lang } from './utils/i18n';
 
 const MenuIcon = () => (
@@ -55,6 +56,7 @@ interface Note {
   date: string;
   time: string;
   image?: string;
+  audio?: string;
   category?: string;
   ai?: AIResponse;
 }
@@ -151,6 +153,18 @@ export default function App() {
   const [newCatIcon, setNewCatIcon] = useState('📝');
   const [isRecording, setIsRecording] = useState(false);
   const [fullImage, setFullImage] = useState<string | null>(null);
+  const [report, setReport] = useState<string | null>(null);
+
+  const generateReport = () => {
+    if (notes.length === 0) return;
+    const text = generateReportText(notes.map(n => ({
+      title: n.title || 'Başlıksız',
+      text: n.text,
+      date: n.date,
+      ai: n.ai,
+    })));
+    setReport(text);
+  };
   const [isDark, setIsDark] = useState(true);
   const [lang, setLang] = useState<Lang>('tr');
   const t = isDark ? themes.dark : themes.light;
@@ -167,44 +181,43 @@ export default function App() {
     setLang(next);
     SecureStore.setItemAsync(LANG_KEY, next);
   };
-  const [voiceText, setVoiceText] = useState('');
-  const [showVoiceModal, setShowVoiceModal] = useState(false);
+  const [audioUri, setAudioUri] = useState<string | undefined>(undefined);
+  const [playingAudio, setPlayingAudio] = useState<string | null>(null);
+  const recorder = useAudioRecorder(RecordingPresets.HIGH_QUALITY);
 
-  const toggleVoice = () => {
-    if (showVoiceModal) {
-      // Gemini'ye gönder, sesli komut gibi yorumlasın
-      if (voiceText.trim()) {
-        setNote(prev => prev + (prev ? '\n' : '') + '⏳ Belle yazıyor...');
-        fetch('https://openrouter.ai/api/v1/chat/completions', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer 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',
-          },
-          body: JSON.stringify({
-            model: 'google/gemini-2.0-flash-001',
-            messages: [
-              { role: 'system', content: 'Kullanıcı sana sesli komut veriyor gibi kısa bir not söyledi. Bunu düzgün, güzel Türkçe ile bir günlük not paragrafına çevir. Sadece notu yaz.' },
-              { role: 'user', content: voiceText },
-            ],
-          }),
-        })
-          .then(res => res.json())
-          .then(data => {
-            const result = data.choices?.[0]?.message?.content || voiceText;
-            setNote(prev => {
-              const cleaned = prev.replace('⏳ Belle yazıyor...', '').trim();
-              return cleaned + (cleaned ? '\n' : '') + result;
-            });
-          })
-          .catch(() => {
-            setNote(prev => prev.replace('⏳ Belle yazıyor...', voiceText));
-          });
+  const playAudio = async (uri: string) => {
+    try {
+      await setAudioModeAsync({ allowsRecording: false, playsInSilentMode: true });
+      const { createAudioPlayer } = require('expo-audio');
+      const player = createAudioPlayer(uri);
+      setPlayingAudio(uri);
+      player.play();
+      // Reset after playback
+      setTimeout(() => setPlayingAudio(null), 10000);
+    } catch (e) {
+      console.log('Play error:', e);
+      setPlayingAudio(null);
+    }
+  };
+
+  const toggleVoice = async () => {
+    try {
+      if (isRecording) {
+        await recorder.stop();
+        setIsRecording(false);
+        if (recorder.uri) {
+          setAudioUri(recorder.uri);
+        }
+      } else {
+        setAudioUri(undefined);
+        await setAudioModeAsync({ allowsRecording: true, playsInSilentMode: true });
+        await recorder.prepareToRecordAsync();
+        recorder.record();
+        setIsRecording(true);
       }
-      setShowVoiceModal(false);
-      setVoiceText('');
-    } else {
-      setShowVoiceModal(true);
+    } catch (e) {
+      console.log('Recording error:', e);
+      setIsRecording(false);
     }
   };
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -307,7 +320,7 @@ export default function App() {
   };
 
   const handleSave = async () => {
-    if (note.trim()) {
+    if (note.trim() || audioUri) {
       if (editingId) {
         saveNotes(notes.map(n => n.id === editingId
           ? { ...n, title: title.trim() || 'Başlıksız', text: note.trim() }
@@ -322,6 +335,7 @@ export default function App() {
           date: formatDate(),
           time: formatTime(),
           image: noteImage,
+          audio: audioUri,
           category: noteCategory,
         };
         saveNotes([newNote, ...notes]);
@@ -340,6 +354,7 @@ export default function App() {
       setNote('');
       setTitle('');
       setNoteImage(undefined);
+      setAudioUri(undefined);
       setNoteCategory('personal');
       setScreen('home');
     }
@@ -380,6 +395,12 @@ export default function App() {
           <Text style={[styles.noteText, { color: t.textSecondary }]} numberOfLines={2}>{item.text}</Text>
           {item.ai && (
             <Text style={styles.noteAiMessage}>{item.ai.message}</Text>
+          )}
+          {item.audio && (
+            <TouchableOpacity style={styles.audioPlayBtn} onPress={() => playAudio(item.audio!)}>
+              <Text style={styles.audioPlayIcon}>{playingAudio === item.audio ? '⏸️' : '▶️'}</Text>
+              <Text style={styles.audioPlayText}>{playingAudio === item.audio ? 'Çalıyor...' : 'Ses Kaydı'}</Text>
+            </TouchableOpacity>
           )}
           <View style={styles.noteMeta}>
             <Text style={styles.noteDate}>{item.date}</Text>
@@ -508,6 +529,38 @@ export default function App() {
             </TouchableOpacity>
           </View>
 
+          {/* AI Report */}
+          <Text style={[styles.menuGroupTitle, { color: t.textMuted }]}>AI</Text>
+          <TouchableOpacity
+            style={[styles.reportButton, { backgroundColor: t.accent + '15', borderColor: t.accent + '30' }]}
+            onPress={generateReport}
+            disabled={notes.length === 0}
+          >
+            <Text style={{ fontSize: 24 }}>📊</Text>
+            <View style={{ flex: 1, marginLeft: 12 }}>
+              <Text style={[styles.reportButtonTitle, { color: t.accent }]}>
+                Günlük Raporu Oluştur
+              </Text>
+              <Text style={[styles.reportButtonDesc, { color: t.textMuted }]}>
+                Belle tüm notlarını analiz edip özet çıkarsın
+              </Text>
+            </View>
+            <Text style={{ color: t.accent, fontSize: 18 }}>›</Text>
+          </TouchableOpacity>
+
+          {report && (
+            <View style={[styles.reportCard, { backgroundColor: t.card, borderColor: t.border }]}>
+              <View style={styles.reportCardHeader}>
+                <Text style={{ fontSize: 16 }}>📖</Text>
+                <Text style={[styles.reportCardTitle, { color: t.accent }]}>Belle'in Raporu</Text>
+              </View>
+              <Text style={[styles.reportCardText, { color: t.text }]}>{report}</Text>
+              <TouchableOpacity onPress={() => setReport(null)} style={styles.reportCloseBtn}>
+                <Text style={[styles.reportCloseText, { color: t.textMuted }]}>Kapat</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+
           {/* App Group */}
           <Text style={[styles.menuGroupTitle, { color: t.textMuted }]}>{l.app}</Text>
           <View style={[styles.menuGroup, { backgroundColor: t.card, borderColor: t.border }]}>
@@ -560,9 +613,13 @@ export default function App() {
       <SafeAreaView style={[styles.container, { backgroundColor: t.bg }]}>
         <StatusBar style={t.statusBar} />
         <View style={styles.topBar}>
-          <View style={styles.iconButton} />
-          <Text style={styles.topBarTitle}>{l.stats}</Text>
-          <View style={styles.iconButton} />
+          <TouchableOpacity style={[styles.iconButton, { backgroundColor: t.card }]} onPress={() => setScreen('menu')}>
+            <MenuIcon />
+          </TouchableOpacity>
+          <Text style={[styles.topBarTitle, { color: t.text }]}>{l.stats}</Text>
+          <TouchableOpacity style={[styles.iconButton, { backgroundColor: t.card }]} onPress={() => { setScreen('home'); setSelectedCategory('all'); setShowSearch(true); }}>
+            <SearchIcon />
+          </TouchableOpacity>
         </View>
 
         <FlatList
@@ -664,6 +721,12 @@ export default function App() {
                 <Image source={{ uri: viewingNote.image }} style={styles.viewImage} />
               </TouchableOpacity>
             )}
+            {viewingNote.audio && (
+              <TouchableOpacity style={styles.audioPlayBtnLarge} onPress={() => playAudio(viewingNote.audio!)}>
+                <Text style={{ fontSize: 24 }}>{playingAudio === viewingNote.audio ? '⏸️' : '▶️'}</Text>
+                <Text style={[styles.audioPlayTextLarge, { color: t.text }]}>{playingAudio === viewingNote.audio ? 'Çalıyor...' : 'Ses Kaydını Dinle'}</Text>
+              </TouchableOpacity>
+            )}
             <Text style={[styles.viewTitle, { color: t.accent }]}>{viewingNote.title || l.untitled}</Text>
             <Text style={[styles.viewText, { color: t.text }]}>{viewingNote.text}</Text>
             {viewingNote.ai && (
@@ -695,7 +758,7 @@ export default function App() {
 
         {/* Write Top Bar */}
         <View style={styles.writeTopBar}>
-          <TouchableOpacity onPress={() => { Keyboard.dismiss(); setScreen('home'); setNote(''); setTitle(''); setNoteImage(undefined); }}>
+          <TouchableOpacity onPress={() => { Keyboard.dismiss(); if (note.trim() || audioUri) { handleSave(); } else { setScreen('home'); setNote(''); setTitle(''); setNoteImage(undefined); setAudioUri(undefined); } }}>
             <Text style={styles.backButton}>← Geri</Text>
           </TouchableOpacity>
           <Text style={styles.writeTopBarTitle}>{editingId ? l.edit : l.newNote}</Text>
@@ -728,20 +791,6 @@ export default function App() {
             </TouchableOpacity>
           </View>
 
-          {/* Category Select */}
-          <View style={styles.writeCatRow}>
-            {categories.filter(c => c.id !== 'all').map(cat => (
-              <TouchableOpacity
-                key={cat.id}
-                style={[styles.writeCatChip, noteCategory === cat.id && { backgroundColor: cat.color + '30', borderColor: cat.color }]}
-                onPress={() => setNoteCategory(cat.id)}
-              >
-                <Text style={styles.catChipIcon}>{cat.icon}</Text>
-                <Text style={[styles.writeCatChipText, noteCategory === cat.id && { color: cat.color }]}>{cat.name}</Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-
           {/* Title Input */}
           <TextInput
             style={styles.writeTitleInput}
@@ -763,50 +812,31 @@ export default function App() {
             scrollEnabled={false}
           />
 
-          {/* Voice Input Modal */}
-          {showVoiceModal && (
-            <View style={styles.voiceModal}>
-              <Text style={styles.voiceModalTitle}>🎤 Belle'e Söyle</Text>
-              <Text style={styles.voiceModalDesc}>Ne düşünüyorsun? Kısaca söyle, Belle güzel bir nota çevirsin.</Text>
-              <TextInput
-                style={styles.voiceModalInput}
-                placeholder="Örn: bugün çok yorgunum ama mutluyum"
-                placeholderTextColor="#6b6b8a"
-                value={voiceText}
-                onChangeText={setVoiceText}
-                multiline
-                autoFocus
-              />
-              <View style={styles.voiceModalButtons}>
-                <TouchableOpacity style={styles.voiceModalCancel} onPress={() => { setShowVoiceModal(false); setVoiceText(''); }}>
-                  <Text style={styles.voiceModalCancelText}>İptal</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={[styles.voiceModalSend, !voiceText.trim() && { opacity: 0.4 }]}
-                  onPress={toggleVoice}
-                  disabled={!voiceText.trim()}
-                >
-                  <Text style={styles.voiceModalSendText}>Belle'e Gönder</Text>
-                </TouchableOpacity>
-              </View>
+          {/* Audio recorded indicator */}
+          {audioUri && (
+            <View style={styles.audioRecorded}>
+              <Text style={styles.audioRecordedText}>✅ Ses kaydı eklendi</Text>
             </View>
           )}
 
           {/* Voice + Save Buttons */}
           <View style={styles.writeActions}>
-            {!showVoiceModal && (
-              <TouchableOpacity style={styles.voiceButton} onPress={toggleVoice}>
-                <Text style={styles.voiceButtonText}>🎤</Text>
-                <Text style={styles.voiceLabel}>Belle'e Söyle</Text>
-              </TouchableOpacity>
-            )}
+            <TouchableOpacity
+              style={[styles.voiceButton, isRecording && styles.voiceButtonActive]}
+              onPress={toggleVoice}
+            >
+              <Text style={styles.voiceButtonText}>{isRecording ? '⏹️' : '🎤'}</Text>
+              <Text style={[styles.voiceLabel, isRecording && styles.voiceLabelActive]}>
+                {isRecording ? 'Kaydediliyor...' : 'Sesli Kaydet'}
+              </Text>
+            </TouchableOpacity>
 
             <TouchableOpacity
-              style={[styles.writeSaveButton, !note.trim() && styles.writeSaveDisabled]}
+              style={[styles.writeSaveButton, (!note.trim() && !audioUri) && styles.writeSaveDisabled]}
               onPress={() => { Keyboard.dismiss(); handleSave(); }}
-              disabled={!note.trim()}
+              disabled={!note.trim() && !audioUri}
             >
-              <Text style={[styles.writeSaveText, !note.trim() && styles.writeSaveTextDisabled]}>{l.save}</Text>
+              <Text style={[styles.writeSaveText, (!note.trim() && !audioUri) && styles.writeSaveTextDisabled]}>{l.save}</Text>
             </TouchableOpacity>
           </View>
         </ScrollView>
@@ -902,7 +932,7 @@ export default function App() {
 
         {/* FAB */}
         <Animated.View style={[styles.fab, { transform: [{ scale: fabScale }] }]}>
-          <TouchableOpacity style={[styles.fabInner, { backgroundColor: t.accent }]} onPress={() => setScreen('write')}>
+          <TouchableOpacity style={[styles.fabInner, { backgroundColor: t.accent }]} onPress={() => { setNoteCategory(selectedCategory === 'all' ? 'personal' : selectedCategory); setScreen('write'); }}>
             <Text style={styles.fabText}>+</Text>
           </TouchableOpacity>
         </Animated.View>
@@ -991,7 +1021,7 @@ export default function App() {
       <Animated.View style={[styles.fab, { transform: [{ scale: fabScale }] }]}>
         <TouchableOpacity
           style={[styles.fabInner, { backgroundColor: t.accent }]}
-          onPress={() => setScreen('write')}
+          onPress={() => { setNoteCategory(selectedCategory === 'all' ? 'personal' : selectedCategory); setScreen('write'); }}
         >
           <Text style={styles.fabText}>+</Text>
         </TouchableOpacity>
@@ -1220,6 +1250,51 @@ const styles = StyleSheet.create({
     color: '#12122a',
     fontSize: 20,
     fontWeight: '700',
+  },
+  reportButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderRadius: 16,
+    borderWidth: 1,
+    padding: 16,
+  },
+  reportButtonTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+  },
+  reportButtonDesc: {
+    fontSize: 12,
+    marginTop: 2,
+  },
+  reportCard: {
+    borderRadius: 16,
+    borderWidth: 1,
+    padding: 18,
+    marginTop: 12,
+  },
+  reportCardHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 12,
+  },
+  reportCardTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+  },
+  reportCardText: {
+    fontSize: 14,
+    lineHeight: 22,
+  },
+  reportCloseBtn: {
+    alignSelf: 'center',
+    marginTop: 14,
+    paddingVertical: 8,
+    paddingHorizontal: 20,
+  },
+  reportCloseText: {
+    fontSize: 14,
+    fontWeight: '600',
   },
   menuFooter: {
     textAlign: 'center',
@@ -1851,12 +1926,65 @@ const styles = StyleSheet.create({
     borderColor: '#2a2a50',
     gap: 8,
   },
+  voiceButtonActive: {
+    borderColor: '#e05555',
+    backgroundColor: '#e0555515',
+  },
   voiceButtonText: {
     fontSize: 18,
   },
   voiceLabel: {
     color: '#7777aa',
     fontSize: 14,
+    fontWeight: '600',
+  },
+  voiceLabelActive: {
+    color: '#e05555',
+  },
+  audioPlayBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#ffe08215',
+    borderRadius: 10,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    marginTop: 8,
+    alignSelf: 'flex-start',
+    gap: 6,
+  },
+  audioPlayIcon: {
+    fontSize: 14,
+  },
+  audioPlayText: {
+    color: '#ffe082',
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  audioPlayBtnLarge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#ffe08215',
+    borderRadius: 14,
+    paddingVertical: 14,
+    paddingHorizontal: 18,
+    marginBottom: 16,
+    gap: 12,
+  },
+  audioPlayTextLarge: {
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  audioRecorded: {
+    marginHorizontal: 28,
+    marginTop: 12,
+    padding: 10,
+    borderRadius: 10,
+    backgroundColor: '#b8e0a020',
+    alignItems: 'center',
+  },
+  audioRecordedText: {
+    color: '#4a9e64',
+    fontSize: 13,
     fontWeight: '600',
   },
   voiceModal: {
