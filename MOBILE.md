@@ -646,19 +646,19 @@ book logo at top.
 ## 🧠 Reflection (fill at the end)
 
 **Hardest part:**
-> 
+> Ses kaydı özelliği en zorlu kısımdı. Expo Go'da native modüller çalışmadığı için expo-speech-recognition, expo-av ve expo-audio arasında çok deneme yaptım. iOS'ta setAudioModeAsync ayarları doğru yapılmadığında kayıt başlamıyordu. Ayrıca API entegrasyonunda Google Gemini free tier kotası sürekli sıfırlanıyordu, OpenRouter key'leri de hızla expire oluyordu. Birden fazla alternatif deneyerek çözüm bulmak gerekti.
 
 **What AI did well:**
-> 
+> Claude Code proje kurulumundan UI tasarımına kadar her aşamada çok hızlıydı. Özellikle React Native component yapısı, StyleSheet tasarımı, state management ve SecureStore entegrasyonunda neredeyse hatasız kod üretti. Belle temalı SVG gül çizimi, Apple Notes tarzı klasör UI'ı ve dark/light mode geçişleri gibi karmaşık tasarımları tek seferde yapabildi. 20+ iterasyonu birkaç saat içinde tamamlamamızı sağladı.
 
 **Where AI failed:**
-> 
+> Expo Go'nun native modül kısıtlamalarını önceden tahmin edemedi — expo-speech-recognition, expo-av gibi paketlerle birçok deneme-yanılma yaşandı. API key yönetiminde de sorunlar oldu — Google Gemini kotası ve OpenRouter key expire sorunları. Bazı UI düzenlemelerinde (klavye ile buton çakışması, modal pozisyonlama) birden fazla düzeltme gerekti.
 
 **If I started over, I would:**
-> 
+> En baştan development build kullanırdım, Expo Go yerine. Böylece native modüller (ses kaydı, bildirimler) sorunsuz çalışırdı. API key'leri .env dosyasında tutardım ve baştan bir ücretsiz API çözümü araştırırdım. Ayrıca tek bir büyük App.tsx yerine ekranları ayrı dosyalara böler, daha temiz bir yapı kurardım.
 
 **Best feature I built:**
-> 
+> Apple Notes tarzı klasör sistemi ve AI ruh hali analizi. Klasörler uygulamaya profesyonel bir görünüm kazandırdı. AI analiz ise her notu kaydederken emoji ve motivasyon mesajı vererek uygulamayı kişisel ve sıcak hale getirdi. Belle karakteri tüm uygulamaya bir ruh kattı.
 
 **Biggest surprise:**
-> 
+> 15 dakikalık iterasyon kuralının ne kadar etkili olduğu şaşırttı. Mükemmeliyetçilik yerine hızlı commit atma yaklaşımı sayesinde 20+ iterasyonda 320 kg'a ulaştık. Kısa döngüler motivasyonu yüksek tutuyor ve her commit'te somut ilerleme görüyorsunuz. Karpathy'nin autoresearch pattern'inin mobil geliştirmede de işe yaradığını bizzat deneyimledim.
