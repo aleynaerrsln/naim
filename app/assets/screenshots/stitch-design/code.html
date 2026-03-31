@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Pocket Belle - The Midnight Archivist</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;700;800&amp;family=Inter:wght@400;500;600&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "surface-dim": "#0d1030",
+                        "on-tertiary-fixed": "#3a0a06",
+                        "on-background": "#e0e0ff",
+                        "surface-container-low": "#161839",
+                        "error": "#ffb4ab",
+                        "on-error-container": "#ffdad6",
+                        "on-error": "#690005",
+                        "surface-container-lowest": "#080a2b",
+                        "secondary-fixed": "#e2e2e2",
+                        "on-tertiary": "#551f18",
+                        "inverse-on-surface": "#2b2d4f",
+                        "on-primary-container": "#957700",
+                        "secondary-fixed-dim": "#c6c6c7",
+                        "surface-variant": "#303254",
+                        "surface-tint": "#e9c349",
+                        "outline": "#918f9b",
+                        "background": "#0d1030",
+                        "on-secondary-container": "#b4b5b5",
+                        "tertiary": "#ffb4a8",
+                        "surface-container-high": "#252748",
+                        "on-secondary": "#2f3131",
+                        "inverse-primary": "#735c00",
+                        "surface-container": "#1a1c3d",
+                        "on-surface": "#e0e0ff",
+                        "primary-fixed-dim": "#e9c349",
+                        "tertiary-container": "#240000",
+                        "secondary-container": "#454747",
+                        "primary": "#e9c349",
+                        "on-secondary-fixed-variant": "#454747",
+                        "on-primary-fixed-variant": "#574500",
+                        "outline-variant": "#464650",
+                        "on-surface-variant": "#c7c5d1",
+                        "on-tertiary-fixed-variant": "#71352c",
+                        "on-tertiary-container": "#b0665b",
+                        "on-primary-fixed": "#241a00",
+                        "surface-bright": "#343658",
+                        "tertiary-fixed-dim": "#ffb4a8",
+                        "surface": "#0d1030",
+                        "primary-fixed": "#ffe088",
+                        "tertiary-fixed": "#ffdad4",
+                        "surface-container-highest": "#303254",
+                        "inverse-surface": "#e0e0ff",
+                        "on-secondary-fixed": "#1a1c1c",
+                        "secondary": "#c6c6c7",
+                        "primary-container": "#110b00",
+                        "error-container": "#93000a",
+                        "on-primary": "#3c2f00"
+                    },
+                    fontFamily: {
+                        "headline": ["Manrope"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .archivist-gradient {
+            background: linear-gradient(135deg, #e9c349 0%, #957700 100%);
+        }
+        body {
+            background-color: #0d1030;
+            color: #e0e0ff;
+            -webkit-tap-highlight-color: transparent;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="font-body selection:bg-primary/30">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 bg-[#0d1030] flex items-center justify-between px-6 py-4 w-full shadow-none">
+<div class="flex items-center gap-3">
+<div class="relative flex items-center justify-center">
+<span class="material-symbols-outlined text-[#e9c349] text-3xl" data-icon="menu_book">menu_book</span>
+<span class="material-symbols-outlined text-[#e9c349] absolute -top-1 -right-1 text-sm" data-icon="local_florist" style="font-variation-settings: 'FILL' 1;">local_florist</span>
+</div>
+<h1 class="text-[#e9c349] font-['Manrope'] font-extrabold tracking-tight text-xl">Pocket Belle</h1>
+</div>
+<div class="flex items-center gap-4">
+<button class="text-[#c7c5d1] hover:bg-[#1a1e3d] transition-colors p-2 rounded-full">
+<span class="material-symbols-outlined" data-icon="search">search</span>
+</button>
+<div class="w-8 h-8 rounded-full overflow-hidden border border-primary/20">
+<img class="w-full h-full object-cover" data-alt="Professional studio portrait of a woman with warm lighting and a soft dark background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCvcx-ChGzutgN0vS6xxb6BYjz-MgsCnmmIpZIuUJeCoybKg7c033XXj5AU--WozHI1hYFADyeNSgk1GUHwDD9GL-oI8tml_yfWSQhP2fiQrkcVARDOSMaLIOJadLS7XZ_NkeBIK6sxjCH7sc22Qy7LKoQePbJ1DtbgBfVO8MCMi6rWQGN8jFFq5FgR3Du1cP1OK3AIRWut_5h7ZAb1QKXWC8p2AebZHgeDNv97WGj0tcLGrppMwnkloYtV_pdc2TWkl91NhkEfUOGg"/>
+</div>
+</div>
+</header>
+<main class="pt-24 pb-32 px-6">
+<!-- Editorial Header -->
+<section class="mb-10">
+<h2 class="font-headline font-extrabold text-4xl text-on-background mb-2 tracking-tight">Archives</h2>
+<p class="text-on-surface-variant font-medium text-sm">Organizing your midnight thoughts</p>
+</section>
+<!-- Bento Layout Note Categories -->
+<div class="space-y-4">
+<!-- Folder Group: All Notes -->
+<div class="bg-surface-container-low p-5 rounded-xl border border-outline-variant/10 group active:scale-95 transition-all duration-200">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
+<span class="material-symbols-outlined text-primary text-2xl" data-icon="folder_special" style="font-variation-settings: 'FILL' 1;">folder_special</span>
+</div>
+<div>
+<h3 class="font-headline font-bold text-lg text-on-surface">All Notes</h3>
+<p class="text-label-md text-on-surface-variant/70 text-xs">91 total entries</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant/40" data-icon="chevron_right">chevron_right</span>
+</div>
+</div>
+<!-- Custom Folder List (Apple Notes Style but Atmospheric) -->
+<div class="bg-surface-container rounded-xl overflow-hidden shadow-2xl">
+<div class="px-5 py-4 border-b border-outline-variant/5">
+<span class="text-primary font-headline font-bold tracking-wider text-[10px] uppercase">Categories</span>
+</div>
+<div class="divide-y divide-outline-variant/5">
+<!-- Personal -->
+<div class="flex items-center justify-between px-5 py-4 hover:bg-surface-container-high transition-colors cursor-pointer group">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary" data-icon="person">person</span>
+<span class="font-body font-medium text-on-surface">Personal</span>
+</div>
+<div class="flex items-center gap-3">
+<span class="text-on-surface-variant text-sm font-medium">24</span>
+<span class="material-symbols-outlined text-on-surface-variant/30 text-sm" data-icon="arrow_forward_ios">arrow_forward_ios</span>
+</div>
+</div>
+<!-- Work -->
+<div class="flex items-center justify-between px-5 py-4 hover:bg-surface-container-high transition-colors cursor-pointer group">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary" data-icon="work">work</span>
+<span class="font-body font-medium text-on-surface">Work</span>
+</div>
+<div class="flex items-center gap-3">
+<span class="text-on-surface-variant text-sm font-medium">12</span>
+<span class="material-symbols-outlined text-on-surface-variant/30 text-sm" data-icon="arrow_forward_ios">arrow_forward_ios</span>
+</div>
+</div>
+<!-- Ideas -->
+<div class="flex items-center justify-between px-5 py-4 hover:bg-surface-container-high transition-colors cursor-pointer group">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary" data-icon="lightbulb">lightbulb</span>
+<span class="font-body font-medium text-on-surface">Ideas</span>
+</div>
+<div class="flex items-center gap-3">
+<span class="text-on-surface-variant text-sm font-medium">48</span>
+<span class="material-symbols-outlined text-on-surface-variant/30 text-sm" data-icon="arrow_forward_ios">arrow_forward_ios</span>
+</div>
+</div>
+<!-- Goals -->
+<div class="flex items-center justify-between px-5 py-4 hover:bg-surface-container-high transition-colors cursor-pointer group">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary" data-icon="track_changes">track_changes</span>
+<span class="font-body font-medium text-on-surface">Goals</span>
+</div>
+<div class="flex items-center gap-3">
+<span class="text-on-surface-variant text-sm font-medium">7</span>
+<span class="material-symbols-outlined text-on-surface-variant/30 text-sm" data-icon="arrow_forward_ios">arrow_forward_ios</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Quick Suggestion/Draft -->
+<div class="mt-8 bg-surface-container-lowest p-6 rounded-2xl border border-primary/5 relative overflow-hidden group cursor-pointer">
+<div class="absolute -right-8 -bottom-8 opacity-10 rotate-12 transition-transform group-hover:scale-110">
+<span class="material-symbols-outlined text-primary text-9xl" data-icon="auto_awesome">auto_awesome</span>
+</div>
+<h4 class="font-headline font-bold text-lg text-primary mb-1">New Spark?</h4>
+<p class="text-on-surface-variant text-sm max-w-[80%] leading-relaxed">Capture a quick thought before it vanishes into the midnight air.</p>
+</div>
+</div>
+</main>
+<!-- FAB -->
+<div class="fixed bottom-24 right-6 z-50">
+<button class="archivist-gradient w-14 h-14 rounded-full flex items-center justify-center shadow-[0_8px_32px_rgba(233,195,73,0.3)] active:scale-90 transition-all duration-200">
+<span class="material-symbols-outlined text-[#241a00] text-3xl font-bold" data-icon="add">add</span>
+</button>
+</div>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 w-full z-50 rounded-t-2xl bg-[#0d1030]/80 backdrop-blur-xl flex justify-around items-center px-8 pb-6 pt-3 border-t border-[#e9c349]/10 shadow-[0_-4px_20px_rgba(0,0,0,0.4)]">
+<!-- Home (Active) -->
+<a class="flex flex-col items-center justify-center text-[#e9c349] bg-[#e9c349]/10 rounded-xl px-4 py-1 transition-all active:scale-90 duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="home" style="font-variation-settings: 'FILL' 1;">home</span>
+<span class="font-['Inter'] text-[11px] font-medium tracking-wide uppercase mt-1">Home</span>
+</a>
+<!-- Stats (Inactive) -->
+<a class="flex flex-col items-center justify-center text-[#c7c5d1] opacity-60 hover:text-[#e9c349] transition-all active:scale-90 duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="analytics">analytics</span>
+<span class="font-['Inter'] text-[11px] font-medium tracking-wide uppercase mt-1">Stats</span>
+</a>
+</nav>
+</body></html>
