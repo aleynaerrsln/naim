@@ -21,6 +21,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { Image } from 'react-native';
 import BelleRose from './components/BelleRose';
 import { analyzeNote, AIResponse } from './utils/gemini';
+import { translations, Lang } from './utils/i18n';
 
 const MenuIcon = () => (
   <Svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke="#9999bb" strokeWidth={2} strokeLinecap="round">
@@ -71,6 +72,7 @@ const formatTime = () => {
 
 const STORAGE_KEY = 'pocket_belle_notes';
 const THEME_KEY = 'pocket_belle_theme';
+const LANG_KEY = 'pocket_belle_lang';
 
 const themes = {
   dark: {
@@ -149,12 +151,20 @@ export default function App() {
   const [newCatIcon, setNewCatIcon] = useState('📝');
   const [isRecording, setIsRecording] = useState(false);
   const [isDark, setIsDark] = useState(true);
+  const [lang, setLang] = useState<Lang>('tr');
   const t = isDark ? themes.dark : themes.light;
+  const l = translations[lang];
 
   const toggleTheme = () => {
     const next = !isDark;
     setIsDark(next);
     SecureStore.setItemAsync(THEME_KEY, next ? 'dark' : 'light');
+  };
+
+  const toggleLang = () => {
+    const next = lang === 'tr' ? 'en' : 'tr';
+    setLang(next);
+    SecureStore.setItemAsync(LANG_KEY, next);
   };
   const [voiceText, setVoiceText] = useState('');
   const [showVoiceModal, setShowVoiceModal] = useState(false);
@@ -248,6 +258,8 @@ export default function App() {
         if (cats) setCategories(JSON.parse(cats));
         const theme = await SecureStore.getItemAsync(THEME_KEY);
         if (theme) setIsDark(theme === 'dark');
+        const savedLang = await SecureStore.getItemAsync(LANG_KEY);
+        if (savedLang) setLang(savedLang as Lang);
       } catch (e) {
         console.log('Load error:', e);
       }
@@ -412,7 +424,7 @@ export default function App() {
           <TouchableOpacity onPress={() => setScreen('home')}>
             <Text style={styles.backButton}>← Geri</Text>
           </TouchableOpacity>
-          <Text style={styles.writeTopBarTitle}>Menü</Text>
+          <Text style={styles.writeTopBarTitle}>{l.menu}</Text>
           <View style={{ width: 50 }} />
         </View>
 
@@ -465,8 +477,16 @@ export default function App() {
                 </TouchableOpacity>
               </View>
 
+              {/* Language Toggle */}
+              <Text style={[styles.menuSectionTitle, { color: t.textSecondary }]}>{l.language}</Text>
+              <TouchableOpacity style={[styles.menuItem, { backgroundColor: t.card }]} onPress={toggleLang}>
+                <Text style={styles.menuItemIcon}>{lang === 'tr' ? '🇹🇷' : '🇬🇧'}</Text>
+                <Text style={[styles.menuItemText, { color: t.text }]}>{lang === 'tr' ? l.turkish : l.english}</Text>
+                <Text style={[styles.menuItemText, { color: t.accent, marginLeft: 'auto' }]}>{l.change}</Text>
+              </TouchableOpacity>
+
               {/* Theme Toggle */}
-              <Text style={[styles.menuSectionTitle, { color: t.textSecondary }]}>Görünüm</Text>
+              <Text style={[styles.menuSectionTitle, { color: t.textSecondary }]}>{l.appearance}</Text>
               <TouchableOpacity style={[styles.menuItem, { backgroundColor: t.card }]} onPress={toggleTheme}>
                 <Text style={styles.menuItemIcon}>{isDark ? '🌙' : '☀️'}</Text>
                 <Text style={[styles.menuItemText, { color: t.text }]}>{isDark ? 'Koyu Tema' : 'Açık Tema'}</Text>
@@ -513,7 +533,7 @@ export default function App() {
         <StatusBar style={t.statusBar} />
         <View style={styles.topBar}>
           <View style={styles.iconButton} />
-          <Text style={styles.topBarTitle}>İstatistikler</Text>
+          <Text style={styles.topBarTitle}>{l.stats}</Text>
           <View style={styles.iconButton} />
         </View>
 
@@ -527,22 +547,22 @@ export default function App() {
               <View style={styles.statsGrid}>
                 <View style={styles.statCard}>
                   <Text style={styles.statNumber}>{notes.length}</Text>
-                  <Text style={styles.statLabel}>Toplam Not</Text>
+                  <Text style={styles.statLabel}>{l.totalNotes}</Text>
                 </View>
                 <View style={styles.statCard}>
                   <Text style={styles.statNumber}>{Object.keys(moodCounts).length}</Text>
-                  <Text style={styles.statLabel}>Farklı Ruh Hali</Text>
+                  <Text style={styles.statLabel}>{l.diffMoods}</Text>
                 </View>
               </View>
 
               <View style={styles.statsGrid}>
                 <View style={styles.statCard}>
                   <Text style={styles.statNumber}>{topMood ? topMood[0] : '—'}</Text>
-                  <Text style={styles.statLabel}>En Sık Ruh Hali</Text>
+                  <Text style={styles.statLabel}>{l.topMood}</Text>
                 </View>
                 <View style={styles.statCard}>
                   <Text style={styles.statNumber}>{notes.reduce((sum, n) => sum + n.text.length, 0)}</Text>
-                  <Text style={styles.statLabel}>Toplam Karakter</Text>
+                  <Text style={styles.statLabel}>{l.totalChars}</Text>
                 </View>
               </View>
 
@@ -569,11 +589,11 @@ export default function App() {
         <View style={[styles.tabBar, { backgroundColor: t.card, borderTopColor: t.border }]}>
           <TouchableOpacity style={styles.tabItem} onPress={() => { setScreen('home'); setActiveTab('home'); }}>
             <HomeIcon active={false} />
-            <Text style={styles.tabLabel}>Ana Sayfa</Text>
+            <Text style={styles.tabLabel}>{l.home}</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.tabItem} onPress={() => {}}>
             <StatsIcon active={true} />
-            <Text style={styles.tabLabelActive}>İstatistik</Text>
+            <Text style={styles.tabLabelActive}>{l.statsTab}</Text>
           </TouchableOpacity>
         </View>
       </SafeAreaView>
@@ -589,9 +609,9 @@ export default function App() {
           <TouchableOpacity onPress={() => setScreen('home')}>
             <Text style={styles.backButton}>← Geri</Text>
           </TouchableOpacity>
-          <Text style={styles.writeTopBarTitle}>Not Detay</Text>
+          <Text style={styles.writeTopBarTitle}>{l.noteDetail}</Text>
           <TouchableOpacity onPress={() => handleEdit(viewingNote)}>
-            <Text style={styles.saveTopButton}>Düzenle</Text>
+            <Text style={styles.saveTopButton}>{l.edit}</Text>
           </TouchableOpacity>
         </View>
         <View style={styles.writeDateRow}>
@@ -615,7 +635,7 @@ export default function App() {
           style={styles.deleteBottomButton}
           onPress={() => handleDelete(viewingNote.id)}
         >
-          <Text style={styles.deleteBottomText}>Notu Sil</Text>
+          <Text style={styles.deleteBottomText}>{l.delete}</Text>
         </TouchableOpacity>
       </SafeAreaView>
     );
@@ -632,7 +652,7 @@ export default function App() {
           <TouchableOpacity onPress={() => { Keyboard.dismiss(); setScreen('home'); setNote(''); setTitle(''); setNoteImage(undefined); }}>
             <Text style={styles.backButton}>← Geri</Text>
           </TouchableOpacity>
-          <Text style={styles.writeTopBarTitle}>{editingId ? 'Düzenle' : 'Yeni Not'}</Text>
+          <Text style={styles.writeTopBarTitle}>{editingId ? l.edit : l.newNote}</Text>
           <View style={{ width: 50 }} />
         </View>
 
@@ -655,10 +675,10 @@ export default function App() {
           {/* Image Buttons */}
           <View style={styles.imageButtons}>
             <TouchableOpacity style={styles.imageButton} onPress={takePhoto}>
-              <Text style={styles.imageButtonText}>📸  Fotoğraf Çek</Text>
+              <Text style={styles.imageButtonText}>{l.takePhoto}</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.imageButton} onPress={pickImage}>
-              <Text style={styles.imageButtonText}>🖼️  Galeriden Seç</Text>
+              <Text style={styles.imageButtonText}>{l.pickImage}</Text>
             </TouchableOpacity>
           </View>
 
@@ -679,7 +699,7 @@ export default function App() {
           {/* Title Input */}
           <TextInput
             style={styles.writeTitleInput}
-            placeholder="Başlık"
+            placeholder={l.titlePlaceholder}
             placeholderTextColor="#5a5a7a"
             value={title}
             onChangeText={setTitle}
@@ -688,7 +708,7 @@ export default function App() {
           {/* Text Area */}
           <TextInput
             style={[styles.writeInput, { minHeight: 300 }]}
-            placeholder="Düşüncelerini yaz..."
+            placeholder={l.notePlaceholder}
             placeholderTextColor="#5a5a7a"
             value={note}
             onChangeText={setNote}
@@ -740,7 +760,7 @@ export default function App() {
               onPress={() => { Keyboard.dismiss(); handleSave(); }}
               disabled={!note.trim()}
             >
-              <Text style={[styles.writeSaveText, !note.trim() && styles.writeSaveTextDisabled]}>Kaydet</Text>
+              <Text style={[styles.writeSaveText, !note.trim() && styles.writeSaveTextDisabled]}>{l.save}</Text>
             </TouchableOpacity>
           </View>
         </ScrollView>
@@ -769,7 +789,7 @@ export default function App() {
         <View style={[styles.searchBar, { backgroundColor: t.card }]}>
           <TextInput
             style={styles.searchInput}
-            placeholder="Notlarda ara..."
+            placeholder={l.searchPlaceholder}
             placeholderTextColor="#6b6b8a"
             value={searchQuery}
             onChangeText={setSearchQuery}
@@ -791,10 +811,10 @@ export default function App() {
         ListHeaderComponent={
           <Animated.View style={[styles.header, { opacity: headerFade, transform: [{ translateY: headerSlide }] }]}>
             <BelleRose size={80} />
-            <Text style={[styles.title, { color: t.accent }]}>Aleyna Pocket Belle</Text>
-            <Text style={[styles.subtitle, { color: t.accent2 }]}>Günlük Not Defterim</Text>
+            <Text style={[styles.title, { color: t.accent }]}>{l.appName}</Text>
+            <Text style={[styles.subtitle, { color: t.accent2 }]}>{l.subtitle}</Text>
             {notes.length > 0 && (
-              <Text style={styles.noteCount}>{notes.length} not</Text>
+              <Text style={styles.noteCount}>{notes.length} {l.noteCount}</Text>
             )}
             <View style={[styles.divider, { backgroundColor: t.accent + '50' }]} />
 
@@ -825,8 +845,8 @@ export default function App() {
         ListEmptyComponent={
           <View style={styles.emptyState}>
             <Text style={styles.emptyEmoji}>📝</Text>
-            <Text style={styles.emptyText}>Henüz not yok</Text>
-            <Text style={styles.emptySubtext}>İlk notunu yazmaya başla!</Text>
+            <Text style={styles.emptyText}>{l.emptyTitle}</Text>
+            <Text style={styles.emptySubtext}>{l.emptySubtitle}</Text>
           </View>
         }
       />
@@ -835,11 +855,11 @@ export default function App() {
       <View style={[styles.tabBar, { backgroundColor: t.card, borderTopColor: t.border }]}>
         <TouchableOpacity style={styles.tabItem} onPress={() => {}}>
           <HomeIcon active={true} />
-          <Text style={styles.tabLabelActive}>Ana Sayfa</Text>
+          <Text style={styles.tabLabelActive}>{l.home}</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.tabItem} onPress={() => { setScreen('stats'); setActiveTab('stats'); }}>
           <StatsIcon active={false} />
-          <Text style={styles.tabLabel}>İstatistik</Text>
+          <Text style={styles.tabLabel}>{l.statsTab}</Text>
         </TouchableOpacity>
       </View>
 

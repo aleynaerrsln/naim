@@ -18,9 +18,9 @@
 
 | Metric | Value |
 |--------|-------|
-| Total Iterations | 16 |
-| Total Weight (kg) | 205 |
-| Total Time (min) | 240 |
+| Total Iterations | 17 |
+| Total Weight (kg) | 230 |
+| Total Time (min) | 255 |
 | Failed Attempts | 0 |
 
 ---
@@ -450,6 +450,32 @@ butonu. Kamera izni iste, çekilen fotoğrafı nota ekle.
 **Screenshot:** `[Expo Go'dan ekran görüntüsü ekle]`
 
 **Commit:** `[NAIM: Aleyna Pocket Belle] Added camera integration - 15kg`
+
+---
+
+### 🏋️ Iteration 17
+
+| Field | Value |
+|-------|-------|
+| Feature | `Multi-language support (i18n) — Turkish/English` |
+| Weight | `25 kg` |
+| Tool Used | `Claude Code` |
+| Time | `15 min` |
+| Attempts | `1` |
+| Status | ✅ Success |
+
+**Prompt given to AI:**
+```
+Iteration 17: Çoklu dil desteği ekle. TR/EN. Tüm yazılar i18n dosyasından
+gelsin. Menüden dil değiştir. Tercih kalıcı kaydedilsin.
+```
+
+**What happened:**
+- i18n.ts dosyası oluşturuldu, tüm yazılar TR/EN olarak tanımlandı. Menüde dil değiştirme butonu eklendi. Tüm ekranlardaki hardcoded yazılar dynamic hale getirildi. Tercih SecureStore'da kalıcı.
+
+**Screenshot:** `[Expo Go'dan ekran görüntüsü ekle]`
+
+**Commit:** `[NAIM: Aleyna Pocket Belle] Added multi-language support TR/EN - 25kg`
 
 ---
 
