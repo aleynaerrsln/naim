@@ -167,6 +167,13 @@ export default function App() {
   };
   const [isDark, setIsDark] = useState(true);
   const [lang, setLang] = useState<Lang>('tr');
+  const [fontSize, setFontSize] = useState(1); // 0=small, 1=normal, 2=large
+  const fontSizes = [
+    { note: 12, title: 14, body: 13 },
+    { note: 15, title: 17, body: 17 },
+    { note: 20, title: 24, body: 22 },
+  ];
+  const fs = fontSizes[fontSize];
   const t = isDark ? themes.dark : themes.light;
   const l = translations[lang];
 
@@ -389,17 +396,17 @@ export default function App() {
         )}
         <View style={styles.noteContent}>
           <View style={styles.noteTitleRow}>
-            <Text style={[styles.noteTitle, { color: t.accent }]}>{item.title || 'Başlıksız'}</Text>
+            <Text style={[styles.noteTitle, { color: t.accent, fontSize: fs.title }]}>{item.title || 'Başlıksız'}</Text>
             {item.ai && <Text style={styles.noteEmoji}>{item.ai.emoji}</Text>}
           </View>
-          <Text style={[styles.noteText, { color: t.textSecondary }]} numberOfLines={2}>{item.text}</Text>
+          <Text style={[styles.noteText, { color: t.textSecondary, fontSize: fs.note }]} numberOfLines={2}>{item.text}</Text>
           {item.ai && (
-            <Text style={styles.noteAiMessage}>{item.ai.message}</Text>
+            <Text style={[styles.noteAiMessage, { fontSize: fs.note - 2 }]}>{item.ai.message}</Text>
           )}
           {item.audio && (
             <TouchableOpacity style={styles.audioPlayBtn} onPress={() => playAudio(item.audio!)}>
-              <Text style={styles.audioPlayIcon}>{playingAudio === item.audio ? '⏸️' : '▶️'}</Text>
-              <Text style={styles.audioPlayText}>{playingAudio === item.audio ? 'Çalıyor...' : 'Ses Kaydı'}</Text>
+              <Text style={styles.audioPlayIcon}>{playingAudio === item.audio ? '⏸' : '🔊'}</Text>
+              <Text style={styles.audioPlayText}>{playingAudio === item.audio ? 'Çalıyor...' : 'Ses Kaydını Dinle'}</Text>
             </TouchableOpacity>
           )}
           <View style={styles.noteMeta}>
@@ -527,6 +534,29 @@ export default function App() {
               <Text style={[styles.menuGroupText, { color: t.text }]}>{lang === 'tr' ? l.turkish : l.english}</Text>
               <Text style={[styles.menuGroupAction, { color: t.accent }]}>{l.change}</Text>
             </TouchableOpacity>
+            <View style={[styles.menuGroupSep, { backgroundColor: t.border }]} />
+            <View style={styles.menuGroupRow}>
+              <View style={[styles.menuIconCircle, { backgroundColor: '#b8e0a020' }]}>
+                <Text style={styles.menuIconEmoji}>🔤</Text>
+              </View>
+              <Text style={[styles.menuGroupText, { color: t.text }]}>{lang === 'tr' ? 'Yazı Boyutu' : 'Font Size'}</Text>
+            </View>
+            <View style={[styles.fontSizeSection, { borderTopColor: t.border }]}>
+              <View style={styles.fontSizeRow}>
+                <TouchableOpacity style={[styles.fontSizeBtn, fontSize === 0 && { backgroundColor: t.accent, borderColor: t.accent }]} onPress={() => setFontSize(0)}>
+                  <Text style={[styles.fontSizeBtnText, { color: fontSize === 0 ? '#12122a' : t.text, fontSize: 11 }]}>A</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={[styles.fontSizeBtn, fontSize === 1 && { backgroundColor: t.accent, borderColor: t.accent }]} onPress={() => setFontSize(1)}>
+                  <Text style={[styles.fontSizeBtnText, { color: fontSize === 1 ? '#12122a' : t.text, fontSize: 16 }]}>A</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={[styles.fontSizeBtn, fontSize === 2 && { backgroundColor: t.accent, borderColor: t.accent }]} onPress={() => setFontSize(2)}>
+                  <Text style={[styles.fontSizeBtnText, { color: fontSize === 2 ? '#12122a' : t.text, fontSize: 22 }]}>A</Text>
+                </TouchableOpacity>
+              </View>
+              <Text style={[styles.fontSizePreview, { color: t.textSecondary, fontSize: fontSizes[fontSize].body }]}>
+                Örnek yazı boyutu
+              </Text>
+            </View>
           </View>
 
           {/* AI Report */}
@@ -723,12 +753,12 @@ export default function App() {
             )}
             {viewingNote.audio && (
               <TouchableOpacity style={styles.audioPlayBtnLarge} onPress={() => playAudio(viewingNote.audio!)}>
-                <Text style={{ fontSize: 24 }}>{playingAudio === viewingNote.audio ? '⏸️' : '▶️'}</Text>
+                <Text style={{ fontSize: 24 }}>{playingAudio === viewingNote.audio ? '⏸' : '🔊'}</Text>
                 <Text style={[styles.audioPlayTextLarge, { color: t.text }]}>{playingAudio === viewingNote.audio ? 'Çalıyor...' : 'Ses Kaydını Dinle'}</Text>
               </TouchableOpacity>
             )}
-            <Text style={[styles.viewTitle, { color: t.accent }]}>{viewingNote.title || l.untitled}</Text>
-            <Text style={[styles.viewText, { color: t.text }]}>{viewingNote.text}</Text>
+            <Text style={[styles.viewTitle, { color: t.accent, fontSize: fs.title + 5 }]}>{viewingNote.title || l.untitled}</Text>
+            <Text style={[styles.viewText, { color: t.text, fontSize: fs.body }]}>{viewingNote.text}</Text>
             {viewingNote.ai && (
               <View style={[styles.aiCard, { backgroundColor: t.card, borderColor: t.accent + '20' }]}>
                 <Text style={styles.aiCardEmoji}>{viewingNote.ai.emoji}</Text>
@@ -873,8 +903,8 @@ export default function App() {
           {dailyQuote.text ? (
             <View style={[styles.quoteCard, { backgroundColor: t.card, borderColor: t.accent + '20' }]}>
               <Text style={[styles.quoteIcon, { color: t.accent }]}>✦</Text>
-              <Text style={[styles.quoteText, { color: t.textSecondary }]}>"{dailyQuote.text}"</Text>
-              <Text style={[styles.quoteAuthor, { color: t.textMuted }]}>— {dailyQuote.author}</Text>
+              <Text style={[styles.quoteText, { color: t.textSecondary, fontSize: fs.note }]}>"{dailyQuote.text}"</Text>
+              <Text style={[styles.quoteAuthor, { color: t.textMuted, fontSize: fs.note - 2 }]}>— {dailyQuote.author}</Text>
             </View>
           ) : null}
 
@@ -887,7 +917,7 @@ export default function App() {
               <Text style={{ fontSize: 22 }}>📒</Text>
             </View>
             <View style={styles.folderAllInfo}>
-              <Text style={[styles.folderAllName, { color: t.accent }]}>{l.all}</Text>
+              <Text style={[styles.folderAllName, { color: t.accent, fontSize: fs.body }]}>{l.all}</Text>
               <Text style={[styles.folderAllCount, { color: t.textMuted }]}>{notes.length} {l.noteCount}</Text>
             </View>
             <Text style={[styles.folderArrow, { color: t.textMuted }]}>›</Text>
@@ -907,7 +937,7 @@ export default function App() {
                     <View style={[styles.folderIcon, { backgroundColor: cat.color + '20' }]}>
                       <Text style={{ fontSize: 18 }}>{cat.icon}</Text>
                     </View>
-                    <Text style={[styles.folderName, { color: t.text }]}>{cat.name}</Text>
+                    <Text style={[styles.folderName, { color: t.text, fontSize: fs.body }]}>{cat.name}</Text>
                     <Text style={[styles.folderCount, { color: t.textMuted }]}>{count}</Text>
                     <Text style={[styles.folderArrow, { color: t.textMuted }]}>›</Text>
                   </TouchableOpacity>
@@ -992,8 +1022,8 @@ export default function App() {
         ListEmptyComponent={
           <View style={styles.emptyState}>
             <Text style={styles.emptyEmoji}>📝</Text>
-            <Text style={[styles.emptyText, { color: t.textMuted }]}>{l.emptyTitle}</Text>
-            <Text style={[styles.emptySubtext, { color: t.textMuted }]}>{l.emptySubtitle}</Text>
+            <Text style={[styles.emptyText, { color: t.textMuted, fontSize: fs.body }]}>{l.emptyTitle}</Text>
+            <Text style={[styles.emptySubtext, { color: t.textMuted, fontSize: fs.note }]}>{l.emptySubtitle}</Text>
           </View>
         }
       />
@@ -1250,6 +1280,32 @@ const styles = StyleSheet.create({
     color: '#12122a',
     fontSize: 20,
     fontWeight: '700',
+  },
+  fontSizeSection: {
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderTopWidth: 1,
+  },
+  fontSizeRow: {
+    flexDirection: 'row',
+    gap: 10,
+    justifyContent: 'center',
+  },
+  fontSizeBtn: {
+    width: 44,
+    height: 44,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: '#2a2a50',
+  },
+  fontSizeBtnText: {
+    fontWeight: '800',
+  },
+  fontSizePreview: {
+    textAlign: 'center',
+    marginTop: 10,
   },
   reportButton: {
     flexDirection: 'row',
@@ -1944,31 +2000,35 @@ const styles = StyleSheet.create({
   audioPlayBtn: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#ffe08215',
-    borderRadius: 10,
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    marginTop: 8,
+    backgroundColor: '#ffe08212',
+    borderRadius: 12,
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    marginTop: 10,
     alignSelf: 'flex-start',
-    gap: 6,
+    gap: 8,
+    borderWidth: 1,
+    borderColor: '#ffe08220',
   },
   audioPlayIcon: {
-    fontSize: 14,
+    fontSize: 16,
   },
   audioPlayText: {
     color: '#ffe082',
-    fontSize: 12,
+    fontSize: 13,
     fontWeight: '600',
   },
   audioPlayBtnLarge: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#ffe08215',
-    borderRadius: 14,
-    paddingVertical: 14,
-    paddingHorizontal: 18,
-    marginBottom: 16,
-    gap: 12,
+    backgroundColor: '#ffe08212',
+    borderRadius: 16,
+    paddingVertical: 16,
+    paddingHorizontal: 20,
+    marginBottom: 18,
+    gap: 14,
+    borderWidth: 1,
+    borderColor: '#ffe08220',
   },
   audioPlayTextLarge: {
     fontSize: 16,
