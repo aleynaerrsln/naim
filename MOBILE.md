@@ -18,9 +18,9 @@
 
 | Metric | Value |
 |--------|-------|
-| Total Iterations | 13 |
-| Total Weight (kg) | 175 |
-| Total Time (min) | 195 |
+| Total Iterations | 15 |
+| Total Weight (kg) | 190 |
+| Total Time (min) | 225 |
 | Failed Attempts | 0 |
 
 ---
@@ -372,6 +372,58 @@ Belle'e Söyle özelliği — kısa metin yaz, AI güzel paragrafa çevirsin.
 **Screenshot:** `[Expo Go'dan ekran görüntüsü ekle]`
 
 **Commit:** `[NAIM: Aleyna Pocket Belle] Added voice input Belle'e Söyle feature - 15kg`
+
+---
+
+### 🏋️ Iteration 14
+
+| Field | Value |
+|-------|-------|
+| Feature | `Dark/Light mode toggle with persistent theme` |
+| Weight | `5 kg` |
+| Tool Used | `Claude Code` |
+| Time | `15 min` |
+| Attempts | `1` |
+| Status | ✅ Success |
+
+**Prompt given to AI:**
+```
+Iteration 14: Dark/Light mode toggle ekle. Menüden değiştir.
+Tüm ekranlar temaya göre değişsin. Tercih kaydedilsin.
+```
+
+**What happened:**
+- Theme objesi ile dark/light renk paletleri tanımlandı. Tüm ekranlar dynamic style ile temaya uyum sağlıyor. Tercih SecureStore'da kalıcı kaydediliyor.
+
+**Screenshot:** `[Expo Go'dan ekran görüntüsü ekle]`
+
+**Commit:** `[NAIM: Aleyna Pocket Belle] Added dark/light mode and push notifications - 15kg`
+
+---
+
+### 🏋️ Iteration 15
+
+| Field | Value |
+|-------|-------|
+| Feature | `Push notification — simulated daily reminder` |
+| Weight | `10 kg` |
+| Tool Used | `Claude Code` |
+| Time | `15 min` |
+| Attempts | `1` |
+| Status | ✅ Success |
+
+**Prompt given to AI:**
+```
+Iteration 15: Push notification ekle. Menüden hatırlatma gönder butonu.
+10 saniye sonra "Belle seni bekliyor" bildirimi gelsin.
+```
+
+**What happened:**
+- expo-notifications ile bildirim sistemi eklendi. Menüden hatırlatma gönder butonuna basınca 10 saniye sonra bildirim geliyor.
+
+**Screenshot:** `[Expo Go'dan ekran görüntüsü ekle]`
+
+**Commit:** `[NAIM: Aleyna Pocket Belle] Added dark/light mode and push notifications - 15kg`
 
 ---
 

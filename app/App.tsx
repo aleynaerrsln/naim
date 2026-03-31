@@ -2,6 +2,7 @@ import { StatusBar } from 'expo-status-bar';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { Keyboard } from 'react-native';
 import * as SecureStore from 'expo-secure-store';
+import * as Notifications from 'expo-notifications';
 import {
   StyleSheet,
   Text,
@@ -69,7 +70,57 @@ const formatTime = () => {
 };
 
 const STORAGE_KEY = 'pocket_belle_notes';
+const THEME_KEY = 'pocket_belle_theme';
+
+const themes = {
+  dark: {
+    bg: '#12122a',
+    card: '#1a1a38',
+    border: '#2a2a50',
+    text: '#e8e0d0',
+    textSecondary: '#9999bb',
+    textMuted: '#6b6b8a',
+    textDim: '#7777aa',
+    accent: '#ffe082',
+    accent2: '#ffff7a',
+    statusBar: 'light' as const,
+  },
+  light: {
+    bg: '#f5f0e8',
+    card: '#ffffff',
+    border: '#d4c8b0',
+    text: '#2a2a3a',
+    textSecondary: '#5a5a6a',
+    textMuted: '#8888aa',
+    textDim: '#aaaacc',
+    accent: '#b8860b',
+    accent2: '#c49520',
+    statusBar: 'dark' as const,
+  },
+};
 const CATEGORIES_KEY = 'pocket_belle_categories';
+
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowAlert: true,
+    shouldPlaySound: true,
+    shouldSetBadge: false,
+  }),
+});
+
+const scheduleReminder = async () => {
+  await Notifications.requestPermissionsAsync();
+  await Notifications.scheduleNotificationAsync({
+    content: {
+      title: '📖 Pocket Belle',
+      body: 'Bugün günlüğüne bir şey yazdın mı? Belle seni bekliyor!',
+    },
+    trigger: {
+      type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,
+      seconds: 10,
+    },
+  });
+};
 
 const DEFAULT_CATEGORIES = [
   { id: 'all', name: 'Tümü', color: '#ffe082', icon: '📒' },
@@ -97,6 +148,14 @@ export default function App() {
   const [newCatName, setNewCatName] = useState('');
   const [newCatIcon, setNewCatIcon] = useState('📝');
   const [isRecording, setIsRecording] = useState(false);
+  const [isDark, setIsDark] = useState(true);
+  const t = isDark ? themes.dark : themes.light;
+
+  const toggleTheme = () => {
+    const next = !isDark;
+    setIsDark(next);
+    SecureStore.setItemAsync(THEME_KEY, next ? 'dark' : 'light');
+  };
   const [voiceText, setVoiceText] = useState('');
   const [showVoiceModal, setShowVoiceModal] = useState(false);
 
@@ -187,6 +246,8 @@ export default function App() {
         if (data) setNotes(JSON.parse(data));
         const cats = await SecureStore.getItemAsync(CATEGORIES_KEY);
         if (cats) setCategories(JSON.parse(cats));
+        const theme = await SecureStore.getItemAsync(THEME_KEY);
+        if (theme) setIsDark(theme === 'dark');
       } catch (e) {
         console.log('Load error:', e);
       }
@@ -281,17 +342,17 @@ export default function App() {
     const accentColor = colors[index % colors.length];
 
     return (
-      <TouchableOpacity style={styles.noteCard} onPress={() => handleView(item)}>
+      <TouchableOpacity style={[styles.noteCard, { backgroundColor: t.card }]} onPress={() => handleView(item)}>
         <View style={[styles.noteAccent, { backgroundColor: accentColor }]} />
         {item.image && (
           <Image source={{ uri: item.image }} style={styles.noteImage} />
         )}
         <View style={styles.noteContent}>
           <View style={styles.noteTitleRow}>
-            <Text style={styles.noteTitle}>{item.title || 'Başlıksız'}</Text>
+            <Text style={[styles.noteTitle, { color: t.accent }]}>{item.title || 'Başlıksız'}</Text>
             {item.ai && <Text style={styles.noteEmoji}>{item.ai.emoji}</Text>}
           </View>
-          <Text style={styles.noteText} numberOfLines={2}>{item.text}</Text>
+          <Text style={[styles.noteText, { color: t.textSecondary }]} numberOfLines={2}>{item.text}</Text>
           {item.ai && (
             <Text style={styles.noteAiMessage}>{item.ai.message}</Text>
           )}
@@ -333,8 +394,8 @@ export default function App() {
     };
 
     return (
-      <SafeAreaView style={styles.container}>
-        <StatusBar style="light" />
+      <SafeAreaView style={[styles.container, { backgroundColor: t.bg }]}>
+        <StatusBar style={t.statusBar} />
         <View style={styles.writeTopBar}>
           <TouchableOpacity onPress={() => setScreen('home')}>
             <Text style={styles.backButton}>← Geri</Text>
@@ -352,18 +413,18 @@ export default function App() {
               {/* App Info */}
               <View style={styles.menuSection}>
                 <BelleRose size={60} />
-                <Text style={styles.menuAppName}>Aleyna Pocket Belle</Text>
-                <Text style={styles.menuAppVersion}>v1.0 — {notes.length} not · {
+                <Text style={[styles.menuAppName, { color: t.accent }]}>Aleyna Pocket Belle</Text>
+                <Text style={[styles.menuAppVersion, { color: t.textDim }]}>v1.0 — {notes.length} not · {
                   notes.reduce((sum, n) => sum + n.text.length, 0)
                 } karakter</Text>
               </View>
 
               {/* Categories */}
-              <Text style={styles.menuSectionTitle}>Kategoriler</Text>
+              <Text style={[styles.menuSectionTitle, { color: t.textSecondary }]}>Kategoriler</Text>
               {categories.filter(c => c.id !== 'all').map(cat => (
-                <View key={cat.id} style={styles.menuCatRow}>
+                <View key={cat.id} style={[styles.menuCatRow, { backgroundColor: t.card }]}>
                   <Text style={styles.menuCatIcon}>{cat.icon}</Text>
-                  <Text style={styles.menuCatName}>{cat.name}</Text>
+                  <Text style={[styles.menuCatName, { color: t.text }]}>{cat.name}</Text>
                   <View style={[styles.menuCatDot, { backgroundColor: cat.color }]} />
                   <Text style={styles.menuCatCount}>
                     {notes.filter(n => n.category === cat.id).length}
@@ -372,39 +433,51 @@ export default function App() {
               ))}
 
               {/* Add Category */}
-              <Text style={styles.menuSectionTitle}>Yeni Kategori Ekle</Text>
+              <Text style={[styles.menuSectionTitle, { color: t.textSecondary }]}>Yeni Kategori Ekle</Text>
               <View style={styles.addCatRow}>
                 <TextInput
-                  style={styles.addCatIcon}
+                  style={[styles.addCatIcon, { backgroundColor: t.card, color: t.text }]}
                   value={newCatIcon}
                   onChangeText={setNewCatIcon}
                   maxLength={2}
                 />
                 <TextInput
-                  style={styles.addCatInput}
+                  style={[styles.addCatInput, { backgroundColor: t.card, color: t.text }]}
                   placeholder="Kategori adı..."
-                  placeholderTextColor="#6b6b8a"
+                  placeholderTextColor={t.textMuted}
                   value={newCatName}
                   onChangeText={setNewCatName}
                 />
-                <TouchableOpacity style={styles.addCatButton} onPress={addCategory}>
+                <TouchableOpacity style={[styles.addCatButton, { backgroundColor: t.accent }]} onPress={addCategory}>
                   <Text style={styles.addCatButtonText}>+</Text>
                 </TouchableOpacity>
               </View>
 
+              {/* Theme Toggle */}
+              <Text style={[styles.menuSectionTitle, { color: t.textSecondary }]}>Görünüm</Text>
+              <TouchableOpacity style={[styles.menuItem, { backgroundColor: t.card }]} onPress={toggleTheme}>
+                <Text style={styles.menuItemIcon}>{isDark ? '🌙' : '☀️'}</Text>
+                <Text style={[styles.menuItemText, { color: t.text }]}>{isDark ? 'Koyu Tema' : 'Açık Tema'}</Text>
+                <Text style={[styles.menuItemText, { color: t.accent, marginLeft: 'auto' }]}>Değiştir</Text>
+              </TouchableOpacity>
+
               {/* Menu Items */}
-              <Text style={styles.menuSectionTitle}>Uygulama</Text>
-              <View style={styles.menuItem}>
+              <Text style={[styles.menuSectionTitle, { color: t.textSecondary }]}>Uygulama</Text>
+              <TouchableOpacity style={[styles.menuItem, { backgroundColor: t.card }]} onPress={scheduleReminder}>
+                <Text style={styles.menuItemIcon}>🔔</Text>
+                <Text style={[styles.menuItemText, { color: t.text }]}>Hatırlatma Gönder (10 sn)</Text>
+              </TouchableOpacity>
+              <View style={[styles.menuItem, { backgroundColor: t.card }]}>
                 <Text style={styles.menuItemIcon}>🌹</Text>
-                <Text style={styles.menuItemText}>Belle Hakkında</Text>
+                <Text style={[styles.menuItemText, { color: t.text }]}>Belle Hakkında</Text>
               </View>
-              <View style={styles.menuItem}>
+              <View style={[styles.menuItem, { backgroundColor: t.card }]}>
                 <Text style={styles.menuItemIcon}>⭐</Text>
-                <Text style={styles.menuItemText}>Uygulamayı Değerlendir</Text>
+                <Text style={[styles.menuItemText, { color: t.text }]}>Uygulamayı Değerlendir</Text>
               </View>
-              <View style={styles.menuItem}>
+              <View style={[styles.menuItem, { backgroundColor: t.card }]}>
                 <Text style={styles.menuItemIcon}>📤</Text>
-                <Text style={styles.menuItemText}>Notları Dışa Aktar</Text>
+                <Text style={[styles.menuItemText, { color: t.text }]}>Notları Dışa Aktar</Text>
               </View>
             </View>
           }
@@ -424,8 +497,8 @@ export default function App() {
     const topMood = Object.entries(moodCounts).sort((a, b) => b[1] - a[1])[0];
 
     return (
-      <SafeAreaView style={styles.container}>
-        <StatusBar style="light" />
+      <SafeAreaView style={[styles.container, { backgroundColor: t.bg }]}>
+        <StatusBar style={t.statusBar} />
         <View style={styles.topBar}>
           <View style={styles.iconButton} />
           <Text style={styles.topBarTitle}>İstatistikler</Text>
@@ -481,7 +554,7 @@ export default function App() {
         />
 
         {/* Tab Bar */}
-        <View style={styles.tabBar}>
+        <View style={[styles.tabBar, { backgroundColor: t.card, borderTopColor: t.border }]}>
           <TouchableOpacity style={styles.tabItem} onPress={() => { setScreen('home'); setActiveTab('home'); }}>
             <HomeIcon active={false} />
             <Text style={styles.tabLabel}>Ana Sayfa</Text>
@@ -498,8 +571,8 @@ export default function App() {
   // ========== VIEW SCREEN ==========
   if (screen === 'view' && viewingNote) {
     return (
-      <SafeAreaView style={styles.container}>
-        <StatusBar style="light" />
+      <SafeAreaView style={[styles.container, { backgroundColor: t.bg }]}>
+        <StatusBar style={t.statusBar} />
         <View style={styles.writeTopBar}>
           <TouchableOpacity onPress={() => setScreen('home')}>
             <Text style={styles.backButton}>← Geri</Text>
@@ -539,8 +612,8 @@ export default function App() {
   // ========== WRITE SCREEN ==========
   if (screen === 'write') {
     return (
-      <SafeAreaView style={styles.container}>
-        <StatusBar style="light" />
+      <SafeAreaView style={[styles.container, { backgroundColor: t.bg }]}>
+        <StatusBar style={t.statusBar} />
 
         {/* Write Top Bar */}
         <View style={styles.writeTopBar}>
@@ -660,23 +733,23 @@ export default function App() {
 
   // ========== HOME SCREEN ==========
   return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar style="light" />
+    <SafeAreaView style={[styles.container, { backgroundColor: t.bg }]}>
+      <StatusBar style={t.statusBar} />
 
       {/* Top Bar */}
       <View style={styles.topBar}>
-        <TouchableOpacity style={styles.iconButton} onPress={() => setScreen('menu')}>
+        <TouchableOpacity style={[styles.iconButton, { backgroundColor: t.card }]} onPress={() => setScreen('menu')}>
           <MenuIcon />
         </TouchableOpacity>
-        <Text style={styles.topBarTitle}>Pocket Belle</Text>
-        <TouchableOpacity style={styles.iconButton} onPress={() => setShowSearch(!showSearch)}>
+        <Text style={[styles.topBarTitle, { color: t.textSecondary }]}>Pocket Belle</Text>
+        <TouchableOpacity style={[styles.iconButton, { backgroundColor: t.card }]} onPress={() => setShowSearch(!showSearch)}>
           <SearchIcon />
         </TouchableOpacity>
       </View>
 
       {/* Search Bar */}
       {showSearch && (
-        <View style={styles.searchBar}>
+        <View style={[styles.searchBar, { backgroundColor: t.card }]}>
           <TextInput
             style={styles.searchInput}
             placeholder="Notlarda ara..."
@@ -701,12 +774,12 @@ export default function App() {
         ListHeaderComponent={
           <Animated.View style={[styles.header, { opacity: headerFade, transform: [{ translateY: headerSlide }] }]}>
             <BelleRose size={80} />
-            <Text style={styles.title}>Aleyna Pocket Belle</Text>
-            <Text style={styles.subtitle}>Günlük Not Defterim</Text>
+            <Text style={[styles.title, { color: t.accent }]}>Aleyna Pocket Belle</Text>
+            <Text style={[styles.subtitle, { color: t.accent2 }]}>Günlük Not Defterim</Text>
             {notes.length > 0 && (
               <Text style={styles.noteCount}>{notes.length} not</Text>
             )}
-            <View style={styles.divider} />
+            <View style={[styles.divider, { backgroundColor: t.accent + '50' }]} />
 
             {/* Category Filter */}
             <View style={styles.catFilterRow}>
@@ -724,10 +797,10 @@ export default function App() {
 
             {/* Daily Quote */}
             {dailyQuote.text ? (
-              <View style={styles.quoteCard}>
-                <Text style={styles.quoteIcon}>✦</Text>
-                <Text style={styles.quoteText}>"{dailyQuote.text}"</Text>
-                <Text style={styles.quoteAuthor}>— {dailyQuote.author}</Text>
+              <View style={[styles.quoteCard, { backgroundColor: t.card, borderColor: t.accent + '20' }]}>
+                <Text style={[styles.quoteIcon, { color: t.accent }]}>✦</Text>
+                <Text style={[styles.quoteText, { color: t.textSecondary }]}>"{dailyQuote.text}"</Text>
+                <Text style={[styles.quoteAuthor, { color: t.textMuted }]}>— {dailyQuote.author}</Text>
               </View>
             ) : null}
           </Animated.View>
@@ -742,7 +815,7 @@ export default function App() {
       />
 
       {/* Tab Bar */}
-      <View style={styles.tabBar}>
+      <View style={[styles.tabBar, { backgroundColor: t.card, borderTopColor: t.border }]}>
         <TouchableOpacity style={styles.tabItem} onPress={() => {}}>
           <HomeIcon active={true} />
           <Text style={styles.tabLabelActive}>Ana Sayfa</Text>
@@ -763,7 +836,7 @@ export default function App() {
       {/* Floating Add Button */}
       <Animated.View style={[styles.fab, { transform: [{ scale: fabScale }] }]}>
         <TouchableOpacity
-          style={styles.fabInner}
+          style={[styles.fabInner, { backgroundColor: t.accent }]}
           onPress={() => setScreen('write')}
         >
           <Text style={styles.fabText}>+</Text>
