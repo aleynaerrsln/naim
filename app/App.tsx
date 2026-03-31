@@ -422,98 +422,125 @@ export default function App() {
         <StatusBar style={t.statusBar} />
         <View style={styles.writeTopBar}>
           <TouchableOpacity onPress={() => setScreen('home')}>
-            <Text style={styles.backButton}>← Geri</Text>
+            <Text style={[styles.backButton, { color: t.accent }]}>{l.back}</Text>
           </TouchableOpacity>
-          <Text style={styles.writeTopBarTitle}>{l.menu}</Text>
+          <Text style={[styles.writeTopBarTitle, { color: t.text }]}>{l.menu}</Text>
           <View style={{ width: 50 }} />
         </View>
 
-        <FlatList
-          data={[]}
-          renderItem={() => null}
-          contentContainerStyle={styles.listContent}
-          ListHeaderComponent={
-            <View>
-              {/* App Info */}
-              <View style={styles.menuSection}>
-                <BelleRose size={60} />
-                <Text style={[styles.menuAppName, { color: t.accent }]}>Aleyna Pocket Belle</Text>
-                <Text style={[styles.menuAppVersion, { color: t.textDim }]}>v1.0 — {notes.length} not · {
-                  notes.reduce((sum, n) => sum + n.text.length, 0)
-                } karakter</Text>
-              </View>
-
-              {/* Categories */}
-              <Text style={[styles.menuSectionTitle, { color: t.textSecondary }]}>Kategoriler</Text>
-              {categories.filter(c => c.id !== 'all').map(cat => (
-                <View key={cat.id} style={[styles.menuCatRow, { backgroundColor: t.card }]}>
-                  <Text style={styles.menuCatIcon}>{cat.icon}</Text>
-                  <Text style={[styles.menuCatName, { color: t.text }]}>{cat.name}</Text>
-                  <View style={[styles.menuCatDot, { backgroundColor: cat.color }]} />
-                  <Text style={styles.menuCatCount}>
-                    {notes.filter(n => n.category === cat.id).length}
-                  </Text>
-                </View>
-              ))}
-
-              {/* Add Category */}
-              <Text style={[styles.menuSectionTitle, { color: t.textSecondary }]}>Yeni Kategori Ekle</Text>
-              <View style={styles.addCatRow}>
-                <TextInput
-                  style={[styles.addCatIcon, { backgroundColor: t.card, color: t.text }]}
-                  value={newCatIcon}
-                  onChangeText={setNewCatIcon}
-                  maxLength={2}
-                />
-                <TextInput
-                  style={[styles.addCatInput, { backgroundColor: t.card, color: t.text }]}
-                  placeholder="Kategori adı..."
-                  placeholderTextColor={t.textMuted}
-                  value={newCatName}
-                  onChangeText={setNewCatName}
-                />
-                <TouchableOpacity style={[styles.addCatButton, { backgroundColor: t.accent }]} onPress={addCategory}>
-                  <Text style={styles.addCatButtonText}>+</Text>
-                </TouchableOpacity>
-              </View>
-
-              {/* Language Toggle */}
-              <Text style={[styles.menuSectionTitle, { color: t.textSecondary }]}>{l.language}</Text>
-              <TouchableOpacity style={[styles.menuItem, { backgroundColor: t.card }]} onPress={toggleLang}>
-                <Text style={styles.menuItemIcon}>{lang === 'tr' ? '🇹🇷' : '🇬🇧'}</Text>
-                <Text style={[styles.menuItemText, { color: t.text }]}>{lang === 'tr' ? l.turkish : l.english}</Text>
-                <Text style={[styles.menuItemText, { color: t.accent, marginLeft: 'auto' }]}>{l.change}</Text>
-              </TouchableOpacity>
-
-              {/* Theme Toggle */}
-              <Text style={[styles.menuSectionTitle, { color: t.textSecondary }]}>{l.appearance}</Text>
-              <TouchableOpacity style={[styles.menuItem, { backgroundColor: t.card }]} onPress={toggleTheme}>
-                <Text style={styles.menuItemIcon}>{isDark ? '🌙' : '☀️'}</Text>
-                <Text style={[styles.menuItemText, { color: t.text }]}>{isDark ? 'Koyu Tema' : 'Açık Tema'}</Text>
-                <Text style={[styles.menuItemText, { color: t.accent, marginLeft: 'auto' }]}>Değiştir</Text>
-              </TouchableOpacity>
-
-              {/* Menu Items */}
-              <Text style={[styles.menuSectionTitle, { color: t.textSecondary }]}>Uygulama</Text>
-              <TouchableOpacity style={[styles.menuItem, { backgroundColor: t.card }]} onPress={scheduleReminder}>
-                <Text style={styles.menuItemIcon}>🔔</Text>
-                <Text style={[styles.menuItemText, { color: t.text }]}>Hatırlatma Gönder (10 sn)</Text>
-              </TouchableOpacity>
-              <View style={[styles.menuItem, { backgroundColor: t.card }]}>
-                <Text style={styles.menuItemIcon}>🌹</Text>
-                <Text style={[styles.menuItemText, { color: t.text }]}>Belle Hakkında</Text>
-              </View>
-              <View style={[styles.menuItem, { backgroundColor: t.card }]}>
-                <Text style={styles.menuItemIcon}>⭐</Text>
-                <Text style={[styles.menuItemText, { color: t.text }]}>Uygulamayı Değerlendir</Text>
-              </View>
-              <View style={[styles.menuItem, { backgroundColor: t.card }]}>
-                <Text style={styles.menuItemIcon}>📤</Text>
-                <Text style={[styles.menuItemText, { color: t.text }]}>Notları Dışa Aktar</Text>
+        <ScrollView contentContainerStyle={styles.menuScroll} showsVerticalScrollIndicator={false}>
+          {/* Profile Card */}
+          <View style={[styles.menuProfileCard, { backgroundColor: t.card, borderColor: t.border }]}>
+            <View style={styles.menuProfileTop}>
+              <BelleRose size={55} />
+              <View style={styles.menuProfileInfo}>
+                <Text style={[styles.menuAppName, { color: t.accent }]}>{l.appName}</Text>
+                <Text style={[styles.menuAppVersion, { color: t.textMuted }]}>v1.0</Text>
               </View>
             </View>
-          }
-        />
+            <View style={[styles.menuProfileStats, { borderTopColor: t.border }]}>
+              <View style={styles.menuProfileStat}>
+                <Text style={[styles.menuProfileStatNum, { color: t.accent }]}>{notes.length}</Text>
+                <Text style={[styles.menuProfileStatLabel, { color: t.textMuted }]}>{l.totalNotes}</Text>
+              </View>
+              <View style={[styles.menuProfileDivider, { backgroundColor: t.border }]} />
+              <View style={styles.menuProfileStat}>
+                <Text style={[styles.menuProfileStatNum, { color: t.accent }]}>{categories.filter(c => c.id !== 'all').length}</Text>
+                <Text style={[styles.menuProfileStatLabel, { color: t.textMuted }]}>{l.categories}</Text>
+              </View>
+            </View>
+          </View>
+
+          {/* Categories Group */}
+          <Text style={[styles.menuGroupTitle, { color: t.textMuted }]}>{l.categories}</Text>
+          <View style={[styles.menuGroup, { backgroundColor: t.card, borderColor: t.border }]}>
+            {categories.filter(c => c.id !== 'all').map((cat, i, arr) => (
+              <View key={cat.id}>
+                <View style={styles.menuGroupRow}>
+                  <View style={[styles.menuIconCircle, { backgroundColor: cat.color + '20' }]}>
+                    <Text style={styles.menuIconEmoji}>{cat.icon}</Text>
+                  </View>
+                  <Text style={[styles.menuGroupText, { color: t.text }]}>{cat.name}</Text>
+                  <View style={[styles.menuBadge, { backgroundColor: cat.color + '20' }]}>
+                    <Text style={[styles.menuBadgeText, { color: cat.color }]}>{notes.filter(n => n.category === cat.id).length}</Text>
+                  </View>
+                </View>
+                {i < arr.length - 1 && <View style={[styles.menuGroupSep, { backgroundColor: t.border }]} />}
+              </View>
+            ))}
+          </View>
+
+          {/* Add Category */}
+          <View style={[styles.menuAddCat, { backgroundColor: t.card, borderColor: t.border }]}>
+            <View style={[styles.menuIconCircle, { backgroundColor: t.accent + '20' }]}>
+              <Text style={styles.menuIconEmoji}>📝</Text>
+            </View>
+            <TextInput
+              style={[styles.menuAddCatInput, { color: t.text }]}
+              placeholder={l.catPlaceholder}
+              placeholderTextColor={t.textMuted}
+              value={newCatName}
+              onChangeText={setNewCatName}
+            />
+            <TouchableOpacity style={[styles.menuAddCatBtn, { backgroundColor: t.accent }]} onPress={addCategory}>
+              <Text style={styles.menuAddCatBtnText}>+</Text>
+            </TouchableOpacity>
+          </View>
+
+          {/* Preferences Group */}
+          <Text style={[styles.menuGroupTitle, { color: t.textMuted }]}>{l.appearance} & {l.language}</Text>
+          <View style={[styles.menuGroup, { backgroundColor: t.card, borderColor: t.border }]}>
+            <TouchableOpacity style={styles.menuGroupRow} onPress={toggleTheme}>
+              <View style={[styles.menuIconCircle, { backgroundColor: isDark ? '#6b6baa20' : '#f4d03f20' }]}>
+                <Text style={styles.menuIconEmoji}>{isDark ? '🌙' : '☀️'}</Text>
+              </View>
+              <Text style={[styles.menuGroupText, { color: t.text }]}>{isDark ? l.darkTheme : l.lightTheme}</Text>
+              <Text style={[styles.menuGroupAction, { color: t.accent }]}>{l.change}</Text>
+            </TouchableOpacity>
+            <View style={[styles.menuGroupSep, { backgroundColor: t.border }]} />
+            <TouchableOpacity style={styles.menuGroupRow} onPress={toggleLang}>
+              <View style={[styles.menuIconCircle, { backgroundColor: '#a0d8ef20' }]}>
+                <Text style={styles.menuIconEmoji}>{lang === 'tr' ? '🇹🇷' : '🇬🇧'}</Text>
+              </View>
+              <Text style={[styles.menuGroupText, { color: t.text }]}>{lang === 'tr' ? l.turkish : l.english}</Text>
+              <Text style={[styles.menuGroupAction, { color: t.accent }]}>{l.change}</Text>
+            </TouchableOpacity>
+          </View>
+
+          {/* App Group */}
+          <Text style={[styles.menuGroupTitle, { color: t.textMuted }]}>{l.app}</Text>
+          <View style={[styles.menuGroup, { backgroundColor: t.card, borderColor: t.border }]}>
+            <TouchableOpacity style={styles.menuGroupRow} onPress={scheduleReminder}>
+              <View style={[styles.menuIconCircle, { backgroundColor: '#ffe08220' }]}>
+                <Text style={styles.menuIconEmoji}>🔔</Text>
+              </View>
+              <Text style={[styles.menuGroupText, { color: t.text }]}>{l.sendReminder}</Text>
+            </TouchableOpacity>
+            <View style={[styles.menuGroupSep, { backgroundColor: t.border }]} />
+            <View style={styles.menuGroupRow}>
+              <View style={[styles.menuIconCircle, { backgroundColor: '#f0a0b820' }]}>
+                <Text style={styles.menuIconEmoji}>🌹</Text>
+              </View>
+              <Text style={[styles.menuGroupText, { color: t.text }]}>{l.aboutBelle}</Text>
+            </View>
+            <View style={[styles.menuGroupSep, { backgroundColor: t.border }]} />
+            <View style={styles.menuGroupRow}>
+              <View style={[styles.menuIconCircle, { backgroundColor: '#ffe08220' }]}>
+                <Text style={styles.menuIconEmoji}>⭐</Text>
+              </View>
+              <Text style={[styles.menuGroupText, { color: t.text }]}>{l.rateApp}</Text>
+            </View>
+            <View style={[styles.menuGroupSep, { backgroundColor: t.border }]} />
+            <View style={styles.menuGroupRow}>
+              <View style={[styles.menuIconCircle, { backgroundColor: '#a0d8ef20' }]}>
+                <Text style={styles.menuIconEmoji}>📤</Text>
+              </View>
+              <Text style={[styles.menuGroupText, { color: t.text }]}>{l.exportNotes}</Text>
+            </View>
+          </View>
+
+          <Text style={[styles.menuFooter, { color: t.textMuted }]}>Aleyna Pocket Belle v1.0{'\n'}NAIM Challenge 2026</Text>
+        </ScrollView>
       </SafeAreaView>
     );
   }
@@ -769,16 +796,121 @@ export default function App() {
   }
 
   // ========== HOME SCREEN ==========
+
+  // Folders view (like Apple Notes)
+  if (selectedCategory === 'all' && !showSearch) {
+    return (
+      <SafeAreaView style={[styles.container, { backgroundColor: t.bg }]}>
+        <StatusBar style={t.statusBar} />
+
+        <ScrollView contentContainerStyle={styles.foldersScroll} showsVerticalScrollIndicator={false}>
+          {/* Top Bar */}
+          <View style={styles.foldersTopBar}>
+            <TouchableOpacity style={[styles.iconButton, { backgroundColor: t.card }]} onPress={() => setScreen('menu')}>
+              <MenuIcon />
+            </TouchableOpacity>
+            <TouchableOpacity style={[styles.iconButton, { backgroundColor: t.card }]} onPress={() => { setShowSearch(true); }}>
+              <SearchIcon />
+            </TouchableOpacity>
+          </View>
+
+          {/* Header */}
+          <Animated.View style={[styles.foldersHeader, { opacity: headerFade, transform: [{ translateY: headerSlide }] }]}>
+            <BelleRose size={60} />
+            <Text style={[styles.foldersTitle, { color: t.accent }]}>{l.appName}</Text>
+          </Animated.View>
+
+          {/* Daily Quote */}
+          {dailyQuote.text ? (
+            <View style={[styles.quoteCard, { backgroundColor: t.card, borderColor: t.accent + '20' }]}>
+              <Text style={[styles.quoteIcon, { color: t.accent }]}>✦</Text>
+              <Text style={[styles.quoteText, { color: t.textSecondary }]}>"{dailyQuote.text}"</Text>
+              <Text style={[styles.quoteAuthor, { color: t.textMuted }]}>— {dailyQuote.author}</Text>
+            </View>
+          ) : null}
+
+          {/* All Notes */}
+          <TouchableOpacity
+            style={[styles.folderAllCard, { backgroundColor: t.accent + '15', borderColor: t.accent + '30' }]}
+            onPress={() => { setSelectedCategory('all'); setShowSearch(true); setSearchQuery(''); }}
+          >
+            <View style={[styles.folderAllIcon, { backgroundColor: t.accent + '25' }]}>
+              <Text style={{ fontSize: 22 }}>📒</Text>
+            </View>
+            <View style={styles.folderAllInfo}>
+              <Text style={[styles.folderAllName, { color: t.accent }]}>{l.all}</Text>
+              <Text style={[styles.folderAllCount, { color: t.textMuted }]}>{notes.length} {l.noteCount}</Text>
+            </View>
+            <Text style={[styles.folderArrow, { color: t.textMuted }]}>›</Text>
+          </TouchableOpacity>
+
+          {/* Category Folders */}
+          <Text style={[styles.menuGroupTitle, { color: t.textMuted }]}>{l.categories}</Text>
+          <View style={[styles.menuGroup, { backgroundColor: t.card, borderColor: t.border }]}>
+            {categories.filter(c => c.id !== 'all').map((cat, i, arr) => {
+              const count = notes.filter(n => n.category === cat.id).length;
+              return (
+                <View key={cat.id}>
+                  <TouchableOpacity
+                    style={styles.folderRow}
+                    onPress={() => setSelectedCategory(cat.id)}
+                  >
+                    <View style={[styles.folderIcon, { backgroundColor: cat.color + '20' }]}>
+                      <Text style={{ fontSize: 18 }}>{cat.icon}</Text>
+                    </View>
+                    <Text style={[styles.folderName, { color: t.text }]}>{cat.name}</Text>
+                    <Text style={[styles.folderCount, { color: t.textMuted }]}>{count}</Text>
+                    <Text style={[styles.folderArrow, { color: t.textMuted }]}>›</Text>
+                  </TouchableOpacity>
+                  {i < arr.length - 1 && <View style={[styles.menuGroupSep, { backgroundColor: t.border }]} />}
+                </View>
+              );
+            })}
+          </View>
+        </ScrollView>
+
+        {/* Tab Bar */}
+        <View style={[styles.tabBar, { backgroundColor: t.card, borderTopColor: t.border }]}>
+          <TouchableOpacity style={styles.tabItem} onPress={() => {}}>
+            <HomeIcon active={true} />
+            <Text style={styles.tabLabelActive}>{l.home}</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.tabItem} onPress={() => { setScreen('stats'); setActiveTab('stats'); }}>
+            <StatsIcon active={false} />
+            <Text style={styles.tabLabel}>{l.statsTab}</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* FAB */}
+        <Animated.View style={[styles.fab, { transform: [{ scale: fabScale }] }]}>
+          <TouchableOpacity style={[styles.fabInner, { backgroundColor: t.accent }]} onPress={() => setScreen('write')}>
+            <Text style={styles.fabText}>+</Text>
+          </TouchableOpacity>
+        </Animated.View>
+
+        {/* AI Analyzing */}
+        {analyzing && (
+          <View style={styles.analyzingBar}>
+            <Text style={styles.analyzingText}>{l.analyzing}</Text>
+          </View>
+        )}
+      </SafeAreaView>
+    );
+  }
+
+  // Notes list view (filtered by category or search)
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: t.bg }]}>
       <StatusBar style={t.statusBar} />
 
       {/* Top Bar */}
       <View style={styles.topBar}>
-        <TouchableOpacity style={[styles.iconButton, { backgroundColor: t.card }]} onPress={() => setScreen('menu')}>
-          <MenuIcon />
+        <TouchableOpacity style={[styles.iconButton, { backgroundColor: t.card }]} onPress={() => { setSelectedCategory('all'); setShowSearch(false); setSearchQuery(''); }}>
+          <Text style={{ color: t.accent, fontSize: 14, fontWeight: '600' }}>← </Text>
         </TouchableOpacity>
-        <Text style={[styles.topBarTitle, { color: t.textSecondary }]}>Pocket Belle</Text>
+        <Text style={[styles.topBarTitle, { color: t.text }]}>
+          {showSearch ? 'Pocket Belle' : categories.find(c => c.id === selectedCategory)?.name || l.all}
+        </Text>
         <TouchableOpacity style={[styles.iconButton, { backgroundColor: t.card }]} onPress={() => setShowSearch(!showSearch)}>
           <SearchIcon />
         </TouchableOpacity>
@@ -788,15 +920,15 @@ export default function App() {
       {showSearch && (
         <View style={[styles.searchBar, { backgroundColor: t.card }]}>
           <TextInput
-            style={styles.searchInput}
+            style={[styles.searchInput, { color: t.text }]}
             placeholder={l.searchPlaceholder}
-            placeholderTextColor="#6b6b8a"
+            placeholderTextColor={t.textMuted}
             value={searchQuery}
             onChangeText={setSearchQuery}
             autoFocus
           />
           <TouchableOpacity onPress={() => { setShowSearch(false); setSearchQuery(''); }}>
-            <Text style={styles.searchClose}>✕</Text>
+            <Text style={[styles.searchClose, { color: t.textMuted }]}>✕</Text>
           </TouchableOpacity>
         </View>
       )}
@@ -808,45 +940,11 @@ export default function App() {
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.listContent}
         showsVerticalScrollIndicator={false}
-        ListHeaderComponent={
-          <Animated.View style={[styles.header, { opacity: headerFade, transform: [{ translateY: headerSlide }] }]}>
-            <BelleRose size={80} />
-            <Text style={[styles.title, { color: t.accent }]}>{l.appName}</Text>
-            <Text style={[styles.subtitle, { color: t.accent2 }]}>{l.subtitle}</Text>
-            {notes.length > 0 && (
-              <Text style={styles.noteCount}>{notes.length} {l.noteCount}</Text>
-            )}
-            <View style={[styles.divider, { backgroundColor: t.accent + '50' }]} />
-
-            {/* Category Filter */}
-            <View style={styles.catFilterRow}>
-              {categories.map(cat => (
-                <TouchableOpacity
-                  key={cat.id}
-                  style={[styles.catChip, selectedCategory === cat.id && { backgroundColor: cat.color + '30', borderColor: cat.color }]}
-                  onPress={() => setSelectedCategory(cat.id)}
-                >
-                  <Text style={styles.catChipIcon}>{cat.icon}</Text>
-                  <Text style={[styles.catChipText, selectedCategory === cat.id && { color: cat.color }]}>{cat.name}</Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-
-            {/* Daily Quote */}
-            {dailyQuote.text ? (
-              <View style={[styles.quoteCard, { backgroundColor: t.card, borderColor: t.accent + '20' }]}>
-                <Text style={[styles.quoteIcon, { color: t.accent }]}>✦</Text>
-                <Text style={[styles.quoteText, { color: t.textSecondary }]}>"{dailyQuote.text}"</Text>
-                <Text style={[styles.quoteAuthor, { color: t.textMuted }]}>— {dailyQuote.author}</Text>
-              </View>
-            ) : null}
-          </Animated.View>
-        }
         ListEmptyComponent={
           <View style={styles.emptyState}>
             <Text style={styles.emptyEmoji}>📝</Text>
-            <Text style={styles.emptyText}>{l.emptyTitle}</Text>
-            <Text style={styles.emptySubtext}>{l.emptySubtitle}</Text>
+            <Text style={[styles.emptyText, { color: t.textMuted }]}>{l.emptyTitle}</Text>
+            <Text style={[styles.emptySubtext, { color: t.textMuted }]}>{l.emptySubtitle}</Text>
           </View>
         }
       />
@@ -962,109 +1060,148 @@ const styles = StyleSheet.create({
   },
 
   // ===== MENU =====
-  menuSection: {
-    alignItems: 'center',
-    paddingVertical: 20,
-    marginBottom: 10,
+  menuScroll: {
+    paddingHorizontal: 24,
+    paddingBottom: 40,
   },
-  menuAppName: {
-    color: '#ffe082',
-    fontSize: 20,
-    fontWeight: '800',
-    marginTop: 12,
+  menuProfileCard: {
+    borderRadius: 20,
+    padding: 20,
+    marginBottom: 8,
+    borderWidth: 1,
   },
-  menuAppVersion: {
-    color: '#7777aa',
-    fontSize: 12,
-    marginTop: 4,
-  },
-  menuSectionTitle: {
-    color: '#9999bb',
-    fontSize: 13,
-    fontWeight: '600',
-    marginTop: 20,
-    marginBottom: 10,
-    letterSpacing: 0.5,
-  },
-  menuCatRow: {
+  menuProfileTop: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#1a1a38',
-    borderRadius: 12,
-    padding: 14,
-    marginBottom: 8,
+    gap: 16,
   },
-  menuCatIcon: {
+  menuProfileInfo: {
+    flex: 1,
+  },
+  menuAppName: {
     fontSize: 20,
+    fontWeight: '800',
+  },
+  menuAppVersion: {
+    fontSize: 12,
+    marginTop: 2,
+  },
+  menuProfileStats: {
+    flexDirection: 'row',
+    marginTop: 16,
+    paddingTop: 16,
+    borderTopWidth: 1,
+  },
+  menuProfileStat: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  menuProfileStatNum: {
+    fontSize: 22,
+    fontWeight: '800',
+  },
+  menuProfileStatLabel: {
+    fontSize: 11,
+    marginTop: 2,
+  },
+  menuProfileDivider: {
+    width: 1,
+    alignSelf: 'stretch',
+  },
+  menuGroupTitle: {
+    fontSize: 12,
+    fontWeight: '600',
+    letterSpacing: 1,
+    textTransform: 'uppercase',
+    marginTop: 24,
+    marginBottom: 8,
+    marginLeft: 4,
+  },
+  menuGroup: {
+    borderRadius: 16,
+    borderWidth: 1,
+    overflow: 'hidden',
+  },
+  menuGroupRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 13,
+    paddingHorizontal: 16,
+  },
+  menuGroupSep: {
+    height: 1,
+    marginLeft: 56,
+  },
+  menuIconCircle: {
+    width: 34,
+    height: 34,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
     marginRight: 12,
   },
-  menuCatName: {
-    color: '#e8e0d0',
+  menuIconEmoji: {
+    fontSize: 17,
+  },
+  menuGroupText: {
     fontSize: 15,
     flex: 1,
   },
-  menuCatDot: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    marginRight: 8,
+  menuGroupAction: {
+    fontSize: 14,
+    fontWeight: '600',
   },
-  menuCatCount: {
-    color: '#7777aa',
+  menuBadge: {
+    paddingHorizontal: 10,
+    paddingVertical: 3,
+    borderRadius: 12,
+  },
+  menuBadgeText: {
     fontSize: 13,
+    fontWeight: '700',
   },
-  addCatRow: {
+  menuAddCat: {
     flexDirection: 'row',
     alignItems: 'center',
+    borderRadius: 16,
+    borderWidth: 1,
+    paddingHorizontal: 12,
+    height: 56,
+    marginTop: 8,
     gap: 8,
   },
-  addCatIcon: {
-    backgroundColor: '#1a1a38',
+  menuAddCatIcon: {
+    width: 40,
+    height: 40,
     borderRadius: 10,
-    width: 44,
-    height: 44,
     textAlign: 'center',
-    fontSize: 20,
-    lineHeight: 44,
-    color: '#e8e0d0',
+    fontSize: 18,
+    padding: 0,
   },
-  addCatInput: {
+  menuAddCatInput: {
     flex: 1,
-    backgroundColor: '#1a1a38',
-    borderRadius: 10,
-    height: 44,
-    paddingHorizontal: 14,
-    color: '#e8e0d0',
-    fontSize: 14,
+    fontSize: 15,
+    padding: 0,
+    margin: 0,
+    height: '100%',
   },
-  addCatButton: {
-    backgroundColor: '#ffe082',
-    width: 44,
-    height: 44,
+  menuAddCatBtn: {
+    width: 40,
+    height: 40,
     borderRadius: 10,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  addCatButtonText: {
+  menuAddCatBtnText: {
     color: '#12122a',
-    fontSize: 22,
+    fontSize: 20,
     fontWeight: '700',
   },
-  menuItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#1a1a38',
-    borderRadius: 12,
-    padding: 14,
-    marginBottom: 8,
-  },
-  menuItemIcon: {
-    fontSize: 18,
-    marginRight: 12,
-  },
-  menuItemText: {
-    color: '#e8e0d0',
-    fontSize: 15,
+  menuFooter: {
+    textAlign: 'center',
+    fontSize: 11,
+    marginTop: 30,
+    lineHeight: 18,
   },
 
   // ===== TAB BAR =====
@@ -1200,6 +1337,81 @@ const styles = StyleSheet.create({
     color: '#6b6b8a',
     fontSize: 18,
     padding: 4,
+  },
+
+  // ===== FOLDERS =====
+  foldersScroll: {
+    paddingHorizontal: 24,
+    paddingBottom: 100,
+  },
+  foldersTopBar: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 10,
+  },
+  foldersHeader: {
+    alignItems: 'center',
+    marginTop: 10,
+    marginBottom: 20,
+  },
+  foldersTitle: {
+    fontSize: 24,
+    fontWeight: '800',
+    marginTop: 10,
+  },
+  folderAllCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderRadius: 16,
+    borderWidth: 1,
+    padding: 16,
+    marginTop: 16,
+    marginBottom: 8,
+  },
+  folderAllIcon: {
+    width: 44,
+    height: 44,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 14,
+  },
+  folderAllInfo: {
+    flex: 1,
+  },
+  folderAllName: {
+    fontSize: 17,
+    fontWeight: '700',
+  },
+  folderAllCount: {
+    fontSize: 13,
+    marginTop: 2,
+  },
+  folderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+  },
+  folderIcon: {
+    width: 38,
+    height: 38,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 14,
+  },
+  folderName: {
+    fontSize: 16,
+    flex: 1,
+  },
+  folderCount: {
+    fontSize: 15,
+    marginRight: 8,
+  },
+  folderArrow: {
+    fontSize: 22,
+    fontWeight: '300',
   },
 
   // ===== HEADER =====

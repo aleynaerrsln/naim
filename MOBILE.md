@@ -18,9 +18,9 @@
 
 | Metric | Value |
 |--------|-------|
-| Total Iterations | 17 |
-| Total Weight (kg) | 230 |
-| Total Time (min) | 255 |
+| Total Iterations | 18 |
+| Total Weight (kg) | 240 |
+| Total Time (min) | 270 |
 | Failed Attempts | 0 |
 
 ---
@@ -476,6 +476,33 @@ gelsin. Menüden dil değiştir. Tercih kalıcı kaydedilsin.
 **Screenshot:** `[Expo Go'dan ekran görüntüsü ekle]`
 
 **Commit:** `[NAIM: Aleyna Pocket Belle] Added multi-language support TR/EN - 25kg`
+
+---
+
+### 🏋️ Iteration 18
+
+| Field | Value |
+|-------|-------|
+| Feature | `Apple Notes style folders UI + menu redesign` |
+| Weight | `10 kg` |
+| Tool Used | `Claude Code` |
+| Time | `15 min` |
+| Attempts | `1` |
+| Status | ✅ Success |
+
+**Prompt given to AI:**
+```
+Iteration 18: Ana ekranı Apple Notes tarzı klasör listesi yap. Kategoriler
+klasör olarak görünsün, tıklayınca notlara gitsin. Hamburger menüyü
+modern profil kartı, gruplu kartlar ile yeniden tasarla.
+```
+
+**What happened:**
+- Ana ekran Apple Notes tarzı klasör listesine dönüştürüldü. Tümü kartı + kategori klasörleri. Tıklayınca not listesine geçiş. Hamburger menü tamamen yeniden tasarlandı — profil kartı, iOS ayarlar tarzı gruplu satırlar, renkli ikon daireleri.
+
+**Screenshot:** `[Expo Go'dan ekran görüntüsü ekle]`
+
+**Commit:** `[NAIM: Aleyna Pocket Belle] Added Apple Notes style folders UI - 10kg`
 
 ---
 
