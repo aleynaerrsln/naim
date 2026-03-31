@@ -150,6 +150,7 @@ export default function App() {
   const [activeTab, setActiveTab] = useState<'home' | 'stats'>('home');
   const [categories, setCategories] = useState<Category[]>(DEFAULT_CATEGORIES);
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const [showFolders, setShowFolders] = useState(true);
   const [noteCategory, setNoteCategory] = useState('personal');
   const [newCatName, setNewCatName] = useState('');
   const [newCatIcon, setNewCatIcon] = useState('📝');
@@ -876,6 +877,20 @@ export default function App() {
             </TouchableOpacity>
           </View>
 
+          {/* Category Select */}
+          <View style={styles.writeCatRow}>
+            {categories.filter(c => c.id !== 'all').map(cat => (
+              <TouchableOpacity
+                key={cat.id}
+                style={[styles.writeCatChip, noteCategory === cat.id && { backgroundColor: cat.color + '30', borderColor: cat.color }]}
+                onPress={() => setNoteCategory(cat.id)}
+              >
+                <Text style={styles.catChipIcon}>{cat.icon}</Text>
+                <Text style={[styles.writeCatChipText, noteCategory === cat.id && { color: cat.color }]}>{cat.name}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+
           {/* Title Input */}
           <TextInput
             style={styles.writeTitleInput}
@@ -932,7 +947,7 @@ export default function App() {
   // ========== HOME SCREEN ==========
 
   // Folders view (like Apple Notes)
-  if (selectedCategory === 'all' && !showSearch) {
+  if (showFolders) {
     return (
       <SafeAreaView style={[styles.container, { backgroundColor: t.bg }]}>
         <StatusBar style={t.statusBar} />
@@ -966,7 +981,7 @@ export default function App() {
           {/* All Notes */}
           <TouchableOpacity
             style={[styles.folderAllCard, { backgroundColor: t.accent + '15', borderColor: t.accent + '30' }]}
-            onPress={() => { setSelectedCategory('all'); setShowSearch(true); setSearchQuery(''); }}
+            onPress={() => { setSelectedCategory('all'); setShowFolders(false); setShowSearch(false); setSearchQuery(''); }}
           >
             <View style={[styles.folderAllIcon, { backgroundColor: t.accent + '25' }]}>
               <Text style={{ fontSize: 22 }}>📒</Text>
@@ -987,7 +1002,7 @@ export default function App() {
                 <View key={cat.id}>
                   <TouchableOpacity
                     style={styles.folderRow}
-                    onPress={() => setSelectedCategory(cat.id)}
+                    onPress={() => { setSelectedCategory(cat.id); setShowFolders(false); }}
                   >
                     <View style={[styles.folderIcon, { backgroundColor: cat.color + '20' }]}>
                       <Text style={{ fontSize: 18 }}>{cat.icon}</Text>
@@ -1039,7 +1054,7 @@ export default function App() {
 
       {/* Top Bar */}
       <View style={styles.topBar}>
-        <TouchableOpacity style={[styles.iconButton, { backgroundColor: t.card }]} onPress={() => { setSelectedCategory('all'); setShowSearch(false); setSearchQuery(''); }}>
+        <TouchableOpacity style={[styles.iconButton, { backgroundColor: t.card }]} onPress={() => { setShowFolders(true); setSelectedCategory('all'); setShowSearch(false); setSearchQuery(''); }}>
           <Text style={{ color: t.accent, fontSize: 14, fontWeight: '600' }}>← </Text>
         </TouchableOpacity>
         <Text style={[styles.topBarTitle, { color: t.text }]}>
@@ -1085,7 +1100,7 @@ export default function App() {
 
       {/* Tab Bar */}
       <View style={[styles.tabBar, { backgroundColor: t.card, borderTopColor: t.border }]}>
-        <TouchableOpacity style={styles.tabItem} onPress={() => {}}>
+        <TouchableOpacity style={styles.tabItem} onPress={() => { setShowFolders(true); setSelectedCategory('all'); }}>
           <HomeIcon active={true} />
           <Text style={styles.tabLabelActive}>{l.home}</Text>
         </TouchableOpacity>
