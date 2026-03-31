@@ -20,15 +20,15 @@ const MenuIcon = () => (
   </Svg>
 );
 
-const SettingsIcon = () => (
+const SearchIcon = () => (
   <Svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke="#9999bb" strokeWidth={2} strokeLinecap="round">
-    <Path d="M12 15a3 3 0 100-6 3 3 0 000 6z" />
-    <Path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z" />
+    <Path d="M11 19a8 8 0 100-16 8 8 0 000 16zM21 21l-4.35-4.35" />
   </Svg>
 );
 
 interface Note {
   id: string;
+  title: string;
   text: string;
   date: string;
   time: string;
@@ -54,6 +54,13 @@ export default function App() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [viewingNote, setViewingNote] = useState<Note | null>(null);
   const [loaded, setLoaded] = useState(false);
+  const [title, setTitle] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [showSearch, setShowSearch] = useState(false);
+
+  const filteredNotes = searchQuery.trim()
+    ? notes.filter(n => (n.title || '').toLowerCase().includes(searchQuery.toLowerCase()) || (n.text || '').toLowerCase().includes(searchQuery.toLowerCase()))
+    : notes;
 
   // Load notes on startup
   useEffect(() => {
@@ -86,13 +93,14 @@ export default function App() {
     if (note.trim()) {
       if (editingId) {
         saveNotes(notes.map(n => n.id === editingId
-          ? { ...n, text: note.trim() }
+          ? { ...n, title: title.trim() || 'Başlıksız', text: note.trim() }
           : n
         ));
         setEditingId(null);
       } else {
         const newNote: Note = {
           id: Date.now().toString(),
+          title: title.trim() || 'Başlıksız',
           text: note.trim(),
           date: formatDate(),
           time: formatTime(),
@@ -100,6 +108,7 @@ export default function App() {
         saveNotes([newNote, ...notes]);
       }
       setNote('');
+      setTitle('');
       setScreen('home');
     }
   };
@@ -110,6 +119,7 @@ export default function App() {
   };
 
   const handleEdit = (item: Note) => {
+    setTitle(item.title);
     setNote(item.text);
     setEditingId(item.id);
     setScreen('write');
@@ -128,7 +138,8 @@ export default function App() {
       <TouchableOpacity style={styles.noteCard} onPress={() => handleView(item)}>
         <View style={[styles.noteAccent, { backgroundColor: accentColor }]} />
         <View style={styles.noteContent}>
-          <Text style={styles.noteText} numberOfLines={3}>{item.text}</Text>
+          <Text style={styles.noteTitle}>{item.title || 'Başlıksız'}</Text>
+          <Text style={styles.noteText} numberOfLines={2}>{item.text}</Text>
           <View style={styles.noteMeta}>
             <Text style={styles.noteDate}>{item.date}</Text>
             <Text style={styles.noteDot}>·</Text>
@@ -160,6 +171,7 @@ export default function App() {
           <Text style={styles.writeDateText}>{viewingNote.date} · {viewingNote.time}</Text>
         </View>
         <View style={styles.viewContent}>
+          <Text style={styles.viewTitle}>{viewingNote.title || 'Başlıksız'}</Text>
           <Text style={styles.viewText}>{viewingNote.text}</Text>
         </View>
         <TouchableOpacity
@@ -180,7 +192,7 @@ export default function App() {
 
         {/* Write Top Bar */}
         <View style={styles.writeTopBar}>
-          <TouchableOpacity onPress={() => { setScreen('home'); setNote(''); }}>
+          <TouchableOpacity onPress={() => { setScreen('home'); setNote(''); setTitle(''); }}>
             <Text style={styles.backButton}>← Geri</Text>
           </TouchableOpacity>
           <Text style={styles.writeTopBarTitle}>{editingId ? 'Düzenle' : 'Yeni Not'}</Text>
@@ -198,6 +210,16 @@ export default function App() {
         <View style={styles.writeDateRow}>
           <Text style={styles.writeDateText}>{formatDate()} · {formatTime()}</Text>
         </View>
+
+        {/* Title Input */}
+        <TextInput
+          style={styles.writeTitleInput}
+          placeholder="Başlık"
+          placeholderTextColor="#5a5a7a"
+          value={title}
+          onChangeText={setTitle}
+          autoFocus
+        />
 
         {/* Text Area */}
         <TextInput
@@ -225,14 +247,31 @@ export default function App() {
           <MenuIcon />
         </TouchableOpacity>
         <Text style={styles.topBarTitle}>Pocket Belle</Text>
-        <TouchableOpacity style={styles.iconButton}>
-          <SettingsIcon />
+        <TouchableOpacity style={styles.iconButton} onPress={() => setShowSearch(!showSearch)}>
+          <SearchIcon />
         </TouchableOpacity>
       </View>
 
+      {/* Search Bar */}
+      {showSearch && (
+        <View style={styles.searchBar}>
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Notlarda ara..."
+            placeholderTextColor="#6b6b8a"
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+            autoFocus
+          />
+          <TouchableOpacity onPress={() => { setShowSearch(false); setSearchQuery(''); }}>
+            <Text style={styles.searchClose}>✕</Text>
+          </TouchableOpacity>
+        </View>
+      )}
+
       {/* Notes List */}
       <FlatList
-        data={notes}
+        data={filteredNotes}
         renderItem={renderNote}
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.listContent}
@@ -296,6 +335,28 @@ const styles = StyleSheet.create({
     color: '#9999bb',
     fontWeight: '600',
     letterSpacing: 0.5,
+  },
+
+  // ===== SEARCH =====
+  searchBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginHorizontal: 24,
+    marginBottom: 12,
+    backgroundColor: '#1a1a38',
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    height: 44,
+  },
+  searchInput: {
+    flex: 1,
+    color: '#f0e6d3',
+    fontSize: 15,
+  },
+  searchClose: {
+    color: '#6b6b8a',
+    fontSize: 18,
+    padding: 4,
   },
 
   // ===== HEADER =====
@@ -371,10 +432,16 @@ const styles = StyleSheet.create({
   noteContent: {
     flex: 1,
   },
+  noteTitle: {
+    color: '#ffe082',
+    fontSize: 16,
+    fontWeight: '700',
+    marginBottom: 4,
+  },
   noteText: {
-    color: '#e8e0d0',
-    fontSize: 15,
-    lineHeight: 23,
+    color: '#9999bb',
+    fontSize: 14,
+    lineHeight: 20,
   },
   noteMeta: {
     flexDirection: 'row',
@@ -435,6 +502,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 28,
     paddingTop: 12,
   },
+  viewTitle: {
+    color: '#ffe082',
+    fontSize: 22,
+    fontWeight: '800',
+    marginBottom: 12,
+  },
   viewText: {
     color: '#f0e6d3',
     fontSize: 17,
@@ -493,10 +566,17 @@ const styles = StyleSheet.create({
     color: '#6b6b8a',
     fontSize: 13,
   },
+  writeTitleInput: {
+    paddingHorizontal: 28,
+    paddingTop: 12,
+    color: '#ffe082',
+    fontSize: 22,
+    fontWeight: '800',
+  },
   writeInput: {
     flex: 1,
     paddingHorizontal: 28,
-    paddingTop: 8,
+    paddingTop: 12,
     color: '#f0e6d3',
     fontSize: 17,
     lineHeight: 28,

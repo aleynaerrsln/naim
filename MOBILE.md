@@ -18,9 +18,9 @@
 
 | Metric | Value |
 |--------|-------|
-| Total Iterations | 5 |
-| Total Weight (kg) | 55 |
-| Total Time (min) | 75 |
+| Total Iterations | 6 |
+| Total Weight (kg) | 65 |
+| Total Time (min) | 90 |
 | Failed Attempts | 0 |
 
 ---
@@ -160,6 +160,32 @@ Local storage ekle.
 **Screenshot:** `[Expo Go'dan ekran görüntüsü ekle]`
 
 **Commit:** `[NAIM: Aleyna Pocket Belle] Added local storage with expo-secure-store - 20kg`
+
+---
+
+### 🏋️ Iteration 6
+
+| Field | Value |
+|-------|-------|
+| Feature | `Search functionality + note titles` |
+| Weight | `10 kg` |
+| Tool Used | `Claude Code` |
+| Time | `15 min` |
+| Attempts | `1` |
+| Status | ✅ Success |
+
+**Prompt given to AI:**
+```
+Iteration 6: Notlara başlık alanı ekle. Arama özelliği ekle — başlığa
+ve içeriğe göre filtrele. Top bar'a arama ikonu koy.
+```
+
+**What happened:**
+- Notlara title alanı eklendi. Yazma ekranında üstte başlık input, altında içerik. Arama ikonu ile notlar filtreleniyor. Eski notlarda title yoksa "Başlıksız" gösteriliyor.
+
+**Screenshot:** `[Expo Go'dan ekran görüntüsü ekle]`
+
+**Commit:** `[NAIM: Aleyna Pocket Belle] Added search functionality and note titles - 10kg`
 
 ---
 
