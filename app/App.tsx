@@ -1,5 +1,6 @@
 import { StatusBar } from 'expo-status-bar';
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { Keyboard } from 'react-native';
 import * as SecureStore from 'expo-secure-store';
 import {
   StyleSheet,
@@ -11,8 +12,12 @@ import {
   FlatList,
   SafeAreaView,
   Animated,
+  ScrollView,
+  KeyboardAvoidingView,
 } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
+import * as ImagePicker from 'expo-image-picker';
+import { Image } from 'react-native';
 import BelleRose from './components/BelleRose';
 import { analyzeNote, AIResponse } from './utils/gemini';
 
@@ -47,6 +52,8 @@ interface Note {
   text: string;
   date: string;
   time: string;
+  image?: string;
+  category?: string;
   ai?: AIResponse;
 }
 
@@ -62,12 +69,33 @@ const formatTime = () => {
 };
 
 const STORAGE_KEY = 'pocket_belle_notes';
+const CATEGORIES_KEY = 'pocket_belle_categories';
+
+const DEFAULT_CATEGORIES = [
+  { id: 'all', name: 'Tümü', color: '#ffe082', icon: '📒' },
+  { id: 'personal', name: 'Kişisel', color: '#f0a0b8', icon: '💭' },
+  { id: 'work', name: 'İş/Okul', color: '#a0d8ef', icon: '📚' },
+  { id: 'ideas', name: 'Fikirler', color: '#b8e0a0', icon: '💡' },
+  { id: 'goals', name: 'Hedefler', color: '#d4a0f0', icon: '🎯' },
+];
+
+interface Category {
+  id: string;
+  name: string;
+  color: string;
+  icon: string;
+}
 
 export default function App() {
   const [note, setNote] = useState('');
   const [notes, setNotes] = useState<Note[]>([]);
-  const [screen, setScreen] = useState<'home' | 'write' | 'view' | 'stats'>('home');
+  const [screen, setScreen] = useState<'home' | 'write' | 'view' | 'stats' | 'menu'>('home');
   const [activeTab, setActiveTab] = useState<'home' | 'stats'>('home');
+  const [categories, setCategories] = useState<Category[]>(DEFAULT_CATEGORIES);
+  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [noteCategory, setNoteCategory] = useState('personal');
+  const [newCatName, setNewCatName] = useState('');
+  const [newCatIcon, setNewCatIcon] = useState('📝');
   const [editingId, setEditingId] = useState<string | null>(null);
   const [viewingNote, setViewingNote] = useState<Note | null>(null);
   const [loaded, setLoaded] = useState(false);
@@ -79,9 +107,11 @@ export default function App() {
   const [searchQuery, setSearchQuery] = useState('');
   const [showSearch, setShowSearch] = useState(false);
 
-  const filteredNotes = searchQuery.trim()
-    ? notes.filter(n => (n.title || '').toLowerCase().includes(searchQuery.toLowerCase()) || (n.text || '').toLowerCase().includes(searchQuery.toLowerCase()))
-    : notes;
+  const filteredNotes = notes.filter(n => {
+    const matchesSearch = !searchQuery.trim() || (n.title || '').toLowerCase().includes(searchQuery.toLowerCase()) || (n.text || '').toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesCategory = selectedCategory === 'all' || n.category === selectedCategory;
+    return matchesSearch && matchesCategory;
+  });
 
   // Header animation
   useEffect(() => {
@@ -113,9 +143,9 @@ export default function App() {
     const load = async () => {
       try {
         const data = await SecureStore.getItemAsync(STORAGE_KEY);
-        if (data) {
-          setNotes(JSON.parse(data));
-        }
+        if (data) setNotes(JSON.parse(data));
+        const cats = await SecureStore.getItemAsync(CATEGORIES_KEY);
+        if (cats) setCategories(JSON.parse(cats));
       } catch (e) {
         console.log('Load error:', e);
       }
@@ -136,6 +166,18 @@ export default function App() {
   }, []);
 
   const [analyzing, setAnalyzing] = useState(false);
+  const [noteImage, setNoteImage] = useState<string | undefined>(undefined);
+
+  const pickImage = async () => {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images'],
+      quality: 0.7,
+      allowsEditing: true,
+    });
+    if (!result.canceled) {
+      setNoteImage(result.assets[0].uri);
+    }
+  };
 
   const handleSave = async () => {
     if (note.trim()) {
@@ -152,6 +194,8 @@ export default function App() {
           text: note.trim(),
           date: formatDate(),
           time: formatTime(),
+          image: noteImage,
+          category: noteCategory,
         };
         saveNotes([newNote, ...notes]);
 
@@ -168,6 +212,8 @@ export default function App() {
       }
       setNote('');
       setTitle('');
+      setNoteImage(undefined);
+      setNoteCategory('personal');
       setScreen('home');
     }
   };
@@ -196,6 +242,9 @@ export default function App() {
     return (
       <TouchableOpacity style={styles.noteCard} onPress={() => handleView(item)}>
         <View style={[styles.noteAccent, { backgroundColor: accentColor }]} />
+        {item.image && (
+          <Image source={{ uri: item.image }} style={styles.noteImage} />
+        )}
         <View style={styles.noteContent}>
           <View style={styles.noteTitleRow}>
             <Text style={styles.noteTitle}>{item.title || 'Başlıksız'}</Text>
@@ -209,10 +258,10 @@ export default function App() {
             <Text style={styles.noteDate}>{item.date}</Text>
             <Text style={styles.noteDot}>·</Text>
             <Text style={styles.noteTime}>{item.time}</Text>
-            {item.ai && (
+            {item.category && (
               <>
                 <Text style={styles.noteDot}>·</Text>
-                <Text style={styles.noteMood}>{item.ai.mood}</Text>
+                <Text style={styles.noteMood}>{categories.find(c => c.id === item.category)?.icon} {categories.find(c => c.id === item.category)?.name}</Text>
               </>
             )}
           </View>
@@ -223,6 +272,105 @@ export default function App() {
       </TouchableOpacity>
     );
   };
+
+  // ========== MENU SCREEN ==========
+  if (screen === 'menu') {
+    const addCategory = () => {
+      if (newCatName.trim()) {
+        const newCat: Category = {
+          id: Date.now().toString(),
+          name: newCatName.trim(),
+          color: ['#f0a0b8', '#a0d8ef', '#b8e0a0', '#d4a0f0', '#f0c8a0'][Math.floor(Math.random() * 5)],
+          icon: newCatIcon,
+        };
+        const updated = [...categories, newCat];
+        setCategories(updated);
+        SecureStore.setItemAsync(CATEGORIES_KEY, JSON.stringify(updated));
+        setNewCatName('');
+        setNewCatIcon('📝');
+      }
+    };
+
+    return (
+      <SafeAreaView style={styles.container}>
+        <StatusBar style="light" />
+        <View style={styles.writeTopBar}>
+          <TouchableOpacity onPress={() => setScreen('home')}>
+            <Text style={styles.backButton}>← Geri</Text>
+          </TouchableOpacity>
+          <Text style={styles.writeTopBarTitle}>Menü</Text>
+          <View style={{ width: 50 }} />
+        </View>
+
+        <FlatList
+          data={[]}
+          renderItem={() => null}
+          contentContainerStyle={styles.listContent}
+          ListHeaderComponent={
+            <View>
+              {/* App Info */}
+              <View style={styles.menuSection}>
+                <BelleRose size={60} />
+                <Text style={styles.menuAppName}>Aleyna Pocket Belle</Text>
+                <Text style={styles.menuAppVersion}>v1.0 — {notes.length} not · {
+                  notes.reduce((sum, n) => sum + n.text.length, 0)
+                } karakter</Text>
+              </View>
+
+              {/* Categories */}
+              <Text style={styles.menuSectionTitle}>Kategoriler</Text>
+              {categories.filter(c => c.id !== 'all').map(cat => (
+                <View key={cat.id} style={styles.menuCatRow}>
+                  <Text style={styles.menuCatIcon}>{cat.icon}</Text>
+                  <Text style={styles.menuCatName}>{cat.name}</Text>
+                  <View style={[styles.menuCatDot, { backgroundColor: cat.color }]} />
+                  <Text style={styles.menuCatCount}>
+                    {notes.filter(n => n.category === cat.id).length}
+                  </Text>
+                </View>
+              ))}
+
+              {/* Add Category */}
+              <Text style={styles.menuSectionTitle}>Yeni Kategori Ekle</Text>
+              <View style={styles.addCatRow}>
+                <TextInput
+                  style={styles.addCatIcon}
+                  value={newCatIcon}
+                  onChangeText={setNewCatIcon}
+                  maxLength={2}
+                />
+                <TextInput
+                  style={styles.addCatInput}
+                  placeholder="Kategori adı..."
+                  placeholderTextColor="#6b6b8a"
+                  value={newCatName}
+                  onChangeText={setNewCatName}
+                />
+                <TouchableOpacity style={styles.addCatButton} onPress={addCategory}>
+                  <Text style={styles.addCatButtonText}>+</Text>
+                </TouchableOpacity>
+              </View>
+
+              {/* Menu Items */}
+              <Text style={styles.menuSectionTitle}>Uygulama</Text>
+              <View style={styles.menuItem}>
+                <Text style={styles.menuItemIcon}>🌹</Text>
+                <Text style={styles.menuItemText}>Belle Hakkında</Text>
+              </View>
+              <View style={styles.menuItem}>
+                <Text style={styles.menuItemIcon}>⭐</Text>
+                <Text style={styles.menuItemText}>Uygulamayı Değerlendir</Text>
+              </View>
+              <View style={styles.menuItem}>
+                <Text style={styles.menuItemIcon}>📤</Text>
+                <Text style={styles.menuItemText}>Notları Dışa Aktar</Text>
+              </View>
+            </View>
+          }
+        />
+      </SafeAreaView>
+    );
+  }
 
   // ========== STATS SCREEN ==========
   if (screen === 'stats') {
@@ -324,6 +472,9 @@ export default function App() {
           <Text style={styles.writeDateText}>{viewingNote.date} · {viewingNote.time}</Text>
         </View>
         <View style={styles.viewContent}>
+          {viewingNote.image && (
+            <Image source={{ uri: viewingNote.image }} style={styles.viewImage} />
+          )}
           <Text style={styles.viewTitle}>{viewingNote.title || 'Başlıksız'}</Text>
           <Text style={styles.viewText}>{viewingNote.text}</Text>
           {viewingNote.ai && (
@@ -352,46 +503,78 @@ export default function App() {
 
         {/* Write Top Bar */}
         <View style={styles.writeTopBar}>
-          <TouchableOpacity onPress={() => { setScreen('home'); setNote(''); setTitle(''); }}>
+          <TouchableOpacity onPress={() => { Keyboard.dismiss(); setScreen('home'); setNote(''); setTitle(''); setNoteImage(undefined); }}>
             <Text style={styles.backButton}>← Geri</Text>
           </TouchableOpacity>
           <Text style={styles.writeTopBarTitle}>{editingId ? 'Düzenle' : 'Yeni Not'}</Text>
+          <View style={{ width: 50 }} />
+        </View>
+
+        <ScrollView style={{ flex: 1 }} keyboardShouldPersistTaps="handled" keyboardDismissMode="on-drag">
+          {/* Date Info */}
+          <View style={styles.writeDateRow}>
+            <Text style={styles.writeDateText}>{formatDate()} · {formatTime()}</Text>
+          </View>
+
+          {/* Image */}
+          {noteImage && (
+            <View style={styles.writeImageContainer}>
+              <Image source={{ uri: noteImage }} style={styles.writeImage} />
+              <TouchableOpacity style={styles.removeImage} onPress={() => setNoteImage(undefined)}>
+                <Text style={styles.removeImageText}>✕</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+
+          {/* Image Button */}
+          <TouchableOpacity style={styles.imageButton} onPress={pickImage}>
+            <Text style={styles.imageButtonText}>🖼️  Fotoğraf Ekle</Text>
+          </TouchableOpacity>
+
+          {/* Category Select */}
+          <View style={styles.writeCatRow}>
+            {categories.filter(c => c.id !== 'all').map(cat => (
+              <TouchableOpacity
+                key={cat.id}
+                style={[styles.writeCatChip, noteCategory === cat.id && { backgroundColor: cat.color + '30', borderColor: cat.color }]}
+                onPress={() => setNoteCategory(cat.id)}
+              >
+                <Text style={styles.catChipIcon}>{cat.icon}</Text>
+                <Text style={[styles.writeCatChipText, noteCategory === cat.id && { color: cat.color }]}>{cat.name}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+
+          {/* Title Input */}
+          <TextInput
+            style={styles.writeTitleInput}
+            placeholder="Başlık"
+            placeholderTextColor="#5a5a7a"
+            value={title}
+            onChangeText={setTitle}
+          />
+
+          {/* Text Area */}
+          <TextInput
+            style={[styles.writeInput, { minHeight: 300 }]}
+            placeholder="Düşüncelerini yaz..."
+            placeholderTextColor="#5a5a7a"
+            value={note}
+            onChangeText={setNote}
+            multiline
+            textAlignVertical="top"
+            scrollEnabled={false}
+          />
+
+          {/* Save Button */}
           <TouchableOpacity
-            onPress={handleSave}
+            style={[styles.writeSaveButton, !note.trim() && styles.writeSaveDisabled]}
+            onPress={() => { Keyboard.dismiss(); handleSave(); }}
             disabled={!note.trim()}
           >
-            <Text style={[styles.saveTopButton, !note.trim() && styles.saveTopButtonDisabled]}>
-              Kaydet
-            </Text>
+            <Text style={[styles.writeSaveText, !note.trim() && styles.writeSaveTextDisabled]}>Kaydet</Text>
           </TouchableOpacity>
-        </View>
-
-        {/* Date Info */}
-        <View style={styles.writeDateRow}>
-          <Text style={styles.writeDateText}>{formatDate()} · {formatTime()}</Text>
-        </View>
-
-        {/* Title Input */}
-        <TextInput
-          style={styles.writeTitleInput}
-          placeholder="Başlık"
-          placeholderTextColor="#5a5a7a"
-          value={title}
-          onChangeText={setTitle}
-          autoFocus
-        />
-
-        {/* Text Area */}
-        <TextInput
-          style={styles.writeInput}
-          placeholder="Düşüncelerini yaz..."
-          placeholderTextColor="#5a5a7a"
-          value={note}
-          onChangeText={setNote}
-          multiline
-          autoFocus
-          textAlignVertical="top"
-        />
+        </ScrollView>
       </SafeAreaView>
     );
   }
@@ -403,7 +586,7 @@ export default function App() {
 
       {/* Top Bar */}
       <View style={styles.topBar}>
-        <TouchableOpacity style={styles.iconButton}>
+        <TouchableOpacity style={styles.iconButton} onPress={() => setScreen('menu')}>
           <MenuIcon />
         </TouchableOpacity>
         <Text style={styles.topBarTitle}>Pocket Belle</Text>
@@ -445,6 +628,20 @@ export default function App() {
               <Text style={styles.noteCount}>{notes.length} not</Text>
             )}
             <View style={styles.divider} />
+
+            {/* Category Filter */}
+            <View style={styles.catFilterRow}>
+              {categories.map(cat => (
+                <TouchableOpacity
+                  key={cat.id}
+                  style={[styles.catChip, selectedCategory === cat.id && { backgroundColor: cat.color + '30', borderColor: cat.color }]}
+                  onPress={() => setSelectedCategory(cat.id)}
+                >
+                  <Text style={styles.catChipIcon}>{cat.icon}</Text>
+                  <Text style={[styles.catChipText, selectedCategory === cat.id && { color: cat.color }]}>{cat.name}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
 
             {/* Daily Quote */}
             {dailyQuote.text ? (
@@ -525,6 +722,160 @@ const styles = StyleSheet.create({
     color: '#9999bb',
     fontWeight: '600',
     letterSpacing: 0.5,
+  },
+
+  // ===== CATEGORIES =====
+  catFilterRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginTop: 16,
+    width: '100%',
+  },
+  catChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: '#2a2a50',
+  },
+  catChipIcon: {
+    fontSize: 14,
+    marginRight: 4,
+  },
+  catChipText: {
+    color: '#7777aa',
+    fontSize: 12,
+    fontWeight: '500',
+  },
+  writeCatRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    paddingHorizontal: 28,
+    marginTop: 12,
+  },
+  writeCatChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: '#2a2a50',
+  },
+  writeCatChipText: {
+    color: '#7777aa',
+    fontSize: 12,
+    fontWeight: '500',
+  },
+
+  // ===== MENU =====
+  menuSection: {
+    alignItems: 'center',
+    paddingVertical: 20,
+    marginBottom: 10,
+  },
+  menuAppName: {
+    color: '#ffe082',
+    fontSize: 20,
+    fontWeight: '800',
+    marginTop: 12,
+  },
+  menuAppVersion: {
+    color: '#7777aa',
+    fontSize: 12,
+    marginTop: 4,
+  },
+  menuSectionTitle: {
+    color: '#9999bb',
+    fontSize: 13,
+    fontWeight: '600',
+    marginTop: 20,
+    marginBottom: 10,
+    letterSpacing: 0.5,
+  },
+  menuCatRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#1a1a38',
+    borderRadius: 12,
+    padding: 14,
+    marginBottom: 8,
+  },
+  menuCatIcon: {
+    fontSize: 20,
+    marginRight: 12,
+  },
+  menuCatName: {
+    color: '#e8e0d0',
+    fontSize: 15,
+    flex: 1,
+  },
+  menuCatDot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    marginRight: 8,
+  },
+  menuCatCount: {
+    color: '#7777aa',
+    fontSize: 13,
+  },
+  addCatRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  addCatIcon: {
+    backgroundColor: '#1a1a38',
+    borderRadius: 10,
+    width: 44,
+    height: 44,
+    textAlign: 'center',
+    fontSize: 20,
+    lineHeight: 44,
+    color: '#e8e0d0',
+  },
+  addCatInput: {
+    flex: 1,
+    backgroundColor: '#1a1a38',
+    borderRadius: 10,
+    height: 44,
+    paddingHorizontal: 14,
+    color: '#e8e0d0',
+    fontSize: 14,
+  },
+  addCatButton: {
+    backgroundColor: '#ffe082',
+    width: 44,
+    height: 44,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  addCatButtonText: {
+    color: '#12122a',
+    fontSize: 22,
+    fontWeight: '700',
+  },
+  menuItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#1a1a38',
+    borderRadius: 12,
+    padding: 14,
+    marginBottom: 8,
+  },
+  menuItemIcon: {
+    fontSize: 18,
+    marginRight: 12,
+  },
+  menuItemText: {
+    color: '#e8e0d0',
+    fontSize: 15,
   },
 
   // ===== TAB BAR =====
@@ -853,6 +1204,59 @@ const styles = StyleSheet.create({
     fontSize: 13,
   },
 
+  // ===== IMAGE =====
+  noteImage: {
+    width: 50,
+    height: 50,
+    borderRadius: 8,
+    marginRight: 12,
+  },
+  viewImage: {
+    width: '100%',
+    height: 200,
+    borderRadius: 14,
+    marginBottom: 16,
+  },
+  writeImageContainer: {
+    marginHorizontal: 28,
+    marginTop: 12,
+    position: 'relative',
+  },
+  writeImage: {
+    width: '100%',
+    height: 180,
+    borderRadius: 14,
+  },
+  removeImage: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    backgroundColor: '#00000088',
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  removeImageText: {
+    color: '#fff',
+    fontSize: 14,
+  },
+  imageButton: {
+    marginHorizontal: 28,
+    marginTop: 10,
+    paddingVertical: 10,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#2a2a50',
+    borderStyle: 'dashed',
+    alignItems: 'center',
+  },
+  imageButtonText: {
+    color: '#7777aa',
+    fontSize: 14,
+  },
+
   // ===== DELETE BUTTON =====
   deleteButton: {
     padding: 8,
@@ -940,8 +1344,27 @@ const styles = StyleSheet.create({
     fontSize: 22,
     fontWeight: '800',
   },
+  writeSaveButton: {
+    backgroundColor: '#ffe082',
+    marginHorizontal: 28,
+    marginTop: 20,
+    marginBottom: 40,
+    paddingVertical: 14,
+    borderRadius: 14,
+    alignItems: 'center',
+  },
+  writeSaveDisabled: {
+    backgroundColor: '#2a2a4a',
+  },
+  writeSaveText: {
+    color: '#12122a',
+    fontSize: 16,
+    fontWeight: '700',
+  },
+  writeSaveTextDisabled: {
+    color: '#6b6b8a',
+  },
   writeInput: {
-    flex: 1,
     paddingHorizontal: 28,
     paddingTop: 12,
     color: '#f0e6d3',

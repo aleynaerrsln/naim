@@ -18,9 +18,9 @@
 
 | Metric | Value |
 |--------|-------|
-| Total Iterations | 10 |
-| Total Weight (kg) | 135 |
-| Total Time (min) | 150 |
+| Total Iterations | 12 |
+| Total Weight (kg) | 160 |
+| Total Time (min) | 180 |
 | Failed Attempts | 0 |
 
 ---
@@ -292,6 +292,59 @@ OpenRouter üzerinden Gemini 2.0 Flash'a bağla.
 **Screenshot:** `[Expo Go'dan ekran görüntüsü ekle]`
 
 **Commit:** `[NAIM: Aleyna Pocket Belle] Added navigation tab bar and stats screen - 15kg`
+
+---
+
+### 🏋️ Iteration 11
+
+| Field | Value |
+|-------|-------|
+| Feature | `Image support — add photos to notes from gallery` |
+| Weight | `10 kg` |
+| Tool Used | `Claude Code` |
+| Time | `15 min` |
+| Attempts | `1` |
+| Status | ✅ Success |
+
+**Prompt given to AI:**
+```
+Iteration 11: Notlara fotoğraf ekleme özelliği. Galeriden fotoğraf seç,
+not kartında thumbnail, detayda büyük görüntü. Kaldırma butonu ekle.
+```
+
+**What happened:**
+- expo-image-picker ile galeriden fotoğraf seçme eklendi. Yazma ekranında önizleme, not kartında thumbnail, detay ekranında tam boyut görüntüleme. Fotoğraf kaldırma butonu eklendi.
+
+**Screenshot:** `[Expo Go'dan ekran görüntüsü ekle]`
+
+**Commit:** `[NAIM: Aleyna Pocket Belle] Added image support and category system - 25kg`
+
+---
+
+### 🏋️ Iteration 12
+
+| Field | Value |
+|-------|-------|
+| Feature | `Hamburger menu + category system for notes` |
+| Weight | `15 kg` |
+| Tool Used | `Claude Code` |
+| Time | `15 min` |
+| Attempts | `1` |
+| Status | ✅ Success |
+
+**Prompt given to AI:**
+```
+Iteration 12: Hamburger menü içini doldur. Kategori sistemi ekle —
+Kişisel, İş/Okul, Fikirler, Hedefler. Yeni kategori oluşturma.
+Ana sayfada kategori filtreleme chip'leri.
+```
+
+**What happened:**
+- Hamburger menü artık çalışıyor — app bilgisi, kategori listesi, yeni kategori oluşturma, uygulama menü ögeleri. Not yazarken kategori seçimi eklendi. Ana sayfada chip'lerle filtreleme yapılıyor.
+
+**Screenshot:** `[Expo Go'dan ekran görüntüsü ekle]`
+
+**Commit:** `[NAIM: Aleyna Pocket Belle] Added image support and category system - 25kg`
 
 ---
 
