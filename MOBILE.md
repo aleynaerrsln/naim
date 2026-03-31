@@ -18,9 +18,9 @@
 
 | Metric | Value |
 |--------|-------|
-| Total Iterations | 6 |
-| Total Weight (kg) | 65 |
-| Total Time (min) | 90 |
+| Total Iterations | 8 |
+| Total Weight (kg) | 95 |
+| Total Time (min) | 120 |
 | Failed Attempts | 0 |
 
 ---
@@ -186,6 +186,58 @@ ve içeriğe göre filtrele. Top bar'a arama ikonu koy.
 **Screenshot:** `[Expo Go'dan ekran görüntüsü ekle]`
 
 **Commit:** `[NAIM: Aleyna Pocket Belle] Added search functionality and note titles - 10kg`
+
+---
+
+### 🏋️ Iteration 7
+
+| Field | Value |
+|-------|-------|
+| Feature | `API call — daily motivational quote from external API` |
+| Weight | `20 kg` |
+| Tool Used | `Claude Code` |
+| Time | `15 min` |
+| Attempts | `1` |
+| Status | ✅ Success |
+
+**Prompt given to AI:**
+```
+Iteration 7: Her açılışta API'den günün sözü çek. Belle temalı şık
+kart ile göster. API çalışmazsa fallback mesaj göster.
+```
+
+**What happened:**
+- quotable.io API'den rastgele motivasyon sözü çekiliyor. Şık kart tasarımı ile header altında görünüyor. API hatası durumunda Belle temalı fallback mesaj gösteriliyor.
+
+**Screenshot:** `[Expo Go'dan ekran görüntüsü ekle]`
+
+**Commit:** `[NAIM: Aleyna Pocket Belle] Added daily quote API and custom animations - 30kg`
+
+---
+
+### 🏋️ Iteration 8
+
+| Field | Value |
+|-------|-------|
+| Feature | `Custom animations — header fade-in, FAB pulse effect` |
+| Weight | `10 kg` |
+| Tool Used | `Claude Code` |
+| Time | `15 min` |
+| Attempts | `1` |
+| Status | ✅ Success |
+
+**Prompt given to AI:**
+```
+Iteration 8: Header açılışta fade-in + slide animasyonu ekle.
+FAB butonuna pulse (nefes) efekti ekle.
+```
+
+**What happened:**
+- React Native Animated API ile header yavaşça belirip yukarı kayıyor. FAB butonu %12 oranında büyüyüp küçülüyor, dikkat çekici ama abartısız.
+
+**Screenshot:** `[Expo Go'dan ekran görüntüsü ekle]`
+
+**Commit:** `[NAIM: Aleyna Pocket Belle] Added daily quote API and custom animations - 30kg`
 
 ---
 

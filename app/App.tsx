@@ -1,5 +1,5 @@
 import { StatusBar } from 'expo-status-bar';
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import * as SecureStore from 'expo-secure-store';
 import {
   StyleSheet,
@@ -10,6 +10,7 @@ import {
   Platform,
   FlatList,
   SafeAreaView,
+  Animated,
 } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 import BelleRose from './components/BelleRose';
@@ -55,12 +56,41 @@ export default function App() {
   const [viewingNote, setViewingNote] = useState<Note | null>(null);
   const [loaded, setLoaded] = useState(false);
   const [title, setTitle] = useState('');
+  const [dailyQuote, setDailyQuote] = useState({ text: '', author: '' });
+  const headerFade = useRef(new Animated.Value(0)).current;
+  const headerSlide = useRef(new Animated.Value(20)).current;
+  const fabScale = useRef(new Animated.Value(1)).current;
   const [searchQuery, setSearchQuery] = useState('');
   const [showSearch, setShowSearch] = useState(false);
 
   const filteredNotes = searchQuery.trim()
     ? notes.filter(n => (n.title || '').toLowerCase().includes(searchQuery.toLowerCase()) || (n.text || '').toLowerCase().includes(searchQuery.toLowerCase()))
     : notes;
+
+  // Header animation
+  useEffect(() => {
+    Animated.parallel([
+      Animated.timing(headerFade, { toValue: 1, duration: 800, useNativeDriver: true }),
+      Animated.timing(headerSlide, { toValue: 0, duration: 800, useNativeDriver: true }),
+    ]).start();
+
+    // FAB pulse
+    const pulse = Animated.loop(
+      Animated.sequence([
+        Animated.timing(fabScale, { toValue: 1.12, duration: 900, useNativeDriver: true }),
+        Animated.timing(fabScale, { toValue: 1, duration: 900, useNativeDriver: true }),
+      ])
+    );
+    pulse.start();
+  }, []);
+
+  // Fetch daily quote
+  useEffect(() => {
+    fetch('https://api.quotable.io/random?maxLength=100')
+      .then(res => res.json())
+      .then(data => setDailyQuote({ text: data.content, author: data.author }))
+      .catch(() => setDailyQuote({ text: 'Her gün yeni bir sayfa, yeni bir başlangıç.', author: 'Belle' }));
+  }, []);
 
   // Load notes on startup
   useEffect(() => {
@@ -277,7 +307,7 @@ export default function App() {
         contentContainerStyle={styles.listContent}
         showsVerticalScrollIndicator={false}
         ListHeaderComponent={
-          <View style={styles.header}>
+          <Animated.View style={[styles.header, { opacity: headerFade, transform: [{ translateY: headerSlide }] }]}>
             <BelleRose size={80} />
             <Text style={styles.title}>Aleyna Pocket Belle</Text>
             <Text style={styles.subtitle}>Günlük Not Defterim</Text>
@@ -285,7 +315,16 @@ export default function App() {
               <Text style={styles.noteCount}>{notes.length} not</Text>
             )}
             <View style={styles.divider} />
-          </View>
+
+            {/* Daily Quote */}
+            {dailyQuote.text ? (
+              <View style={styles.quoteCard}>
+                <Text style={styles.quoteIcon}>✦</Text>
+                <Text style={styles.quoteText}>"{dailyQuote.text}"</Text>
+                <Text style={styles.quoteAuthor}>— {dailyQuote.author}</Text>
+              </View>
+            ) : null}
+          </Animated.View>
         }
         ListEmptyComponent={
           <View style={styles.emptyState}>
@@ -297,12 +336,14 @@ export default function App() {
       />
 
       {/* Floating Add Button */}
-      <TouchableOpacity
-        style={styles.fab}
-        onPress={() => setScreen('write')}
-      >
-        <Text style={styles.fabText}>+</Text>
-      </TouchableOpacity>
+      <Animated.View style={[styles.fab, { transform: [{ scale: fabScale }] }]}>
+        <TouchableOpacity
+          style={styles.fabInner}
+          onPress={() => setScreen('write')}
+        >
+          <Text style={styles.fabText}>+</Text>
+        </TouchableOpacity>
+      </Animated.View>
     </SafeAreaView>
   );
 }
@@ -335,6 +376,34 @@ const styles = StyleSheet.create({
     color: '#9999bb',
     fontWeight: '600',
     letterSpacing: 0.5,
+  },
+
+  // ===== QUOTE =====
+  quoteCard: {
+    width: '100%',
+    backgroundColor: '#1a1a38',
+    borderRadius: 16,
+    padding: 20,
+    marginTop: 20,
+    borderWidth: 1,
+    borderColor: '#ffe08215',
+  },
+  quoteIcon: {
+    color: '#ffe082',
+    fontSize: 16,
+    marginBottom: 8,
+  },
+  quoteText: {
+    color: '#d0c8b8',
+    fontSize: 14,
+    fontStyle: 'italic',
+    lineHeight: 22,
+    marginBottom: 8,
+  },
+  quoteAuthor: {
+    color: '#7777aa',
+    fontSize: 12,
+    textAlign: 'right',
   },
 
   // ===== SEARCH =====
@@ -470,14 +539,19 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: '#ffe082',
-    alignItems: 'center',
-    justifyContent: 'center',
     shadowColor: '#ffe082',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.4,
     shadowRadius: 10,
     elevation: 8,
+  },
+  fabInner: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: '#ffe082',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   fabText: {
     fontSize: 28,
