@@ -18,9 +18,9 @@
 
 | Metric | Value |
 |--------|-------|
-| Total Iterations | 20 |
-| Total Weight (kg) | 265 |
-| Total Time (min) | 300 |
+| Total Iterations | 24 |
+| Total Weight (kg) | 320 |
+| Total Time (min) | 360 |
 | Failed Attempts | 0 |
 
 ---
@@ -555,6 +555,87 @@ Menüde rapor butonu. Ruh hali eğilimi, konu analizi, kişisel mesaj.
 **Screenshot:** `[Expo Go'dan ekran görüntüsü ekle]`
 
 **Commit:** `[NAIM: Aleyna Pocket Belle] Added voice recording and AI report generation - 40kg`
+
+---
+
+### 🏋️ Iteration 21
+
+| Field | Value |
+|-------|-------|
+| Feature | `Accessibility — font size control (small/medium/large)` |
+| Weight | `25 kg` |
+| Tool Used | `Claude Code` |
+| Time | `15 min` |
+| Attempts | `1` |
+| Status | ✅ Success |
+
+**Prompt given to AI:**
+```
+Iteration 21: Erişilebilirlik — menüde yazı boyutu ayarı. Küçük/orta/büyük
+seçimi. Tüm ekranlara dinamik font size uygula.
+```
+
+**What happened:**
+- Menüye A/A/A font size butonları eklendi. Seçilen boyut tüm not kartları, detay ekranı, klasörler ve quote'lara uygulanıyor. Preview ile anında görülebilir.
+
+**Screenshot:** `[Expo Go'dan ekran görüntüsü ekle]`
+
+**Commit:** `[NAIM: Aleyna Pocket Belle] Added sharing, favorites, pinning, undo delete and Stitch design - 30kg`
+
+---
+
+### 🏋️ Iteration 22
+
+| Field | Value |
+|-------|-------|
+| Feature | `Note sharing, favorites, pinning, undo delete` |
+| Weight | `25 kg` |
+| Tool Used | `Claude Code` |
+| Time | `15 min` |
+| Attempts | `1` |
+| Status | ✅ Success |
+
+**Prompt given to AI:**
+```
+Iteration 22: Not paylaşma (Share), favorileme (yıldız), pinleme (üste
+sabitle), geri al (undo delete) özelliklerini ekle.
+```
+
+**What happened:**
+- Not kartlarında 📌 pin, ⭐ favori, 📤 paylaş butonları eklendi. Pinli notlar listenin üstüne çıkıyor. Share telefon paylaşım menüsünü açıyor. Silme sonrası 5 saniye geri alma barı.
+
+**Screenshot:** `[Expo Go'dan ekran görüntüsü ekle]`
+
+**Commit:** `[NAIM: Aleyna Pocket Belle] Added sharing, favorites, pinning, undo delete and Stitch design - 30kg`
+
+---
+
+### 🏋️ Iteration 23
+
+| Field | Value |
+|-------|-------|
+| Feature | `Stitch design — AI-generated UI mockup for Pocket Belle` |
+| Weight | `+5 kg bonus (tool combination: Stitch + Claude Code)` |
+| Tool Used | `Google Stitch + Claude Code` |
+| Time | `5 min` |
+| Attempts | `1` |
+| Status | ✅ Success |
+
+**Prompt given to AI (Stitch):**
+```
+A dark theme mobile journal app called Pocket Belle. Golden/amber accent
+colors. Home screen shows folder list like Apple Notes with categories:
+Personal, Work, Ideas, Goals. Each folder has emoji icon and note count.
+Bottom tab bar with Home and Stats. Floating + button. Belle rose and
+book logo at top.
+```
+
+**What happened:**
+- Google Stitch ile Pocket Belle için profesyonel UI mockup üretildi. Tasarım mevcut uygulamayla uyumlu — dark tema, altın aksanlar, klasör listesi, tab bar. Tool switching bonus kazanıldı.
+
+**Screenshot:** `app/assets/screenshots/stitch-design.png`
+
+**Commit:** `[NAIM: Aleyna Pocket Belle] Added sharing, favorites, pinning, undo delete and Stitch design - 30kg`
 
 ---
 

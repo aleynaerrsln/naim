@@ -58,6 +58,8 @@ interface Note {
   image?: string;
   audio?: string;
   category?: string;
+  pinned?: boolean;
+  favorite?: boolean;
   ai?: AIResponse;
 }
 
@@ -242,7 +244,7 @@ export default function App() {
     const matchesSearch = !searchQuery.trim() || (n.title || '').toLowerCase().includes(searchQuery.toLowerCase()) || (n.text || '').toLowerCase().includes(searchQuery.toLowerCase());
     const matchesCategory = selectedCategory === 'all' || n.category === selectedCategory;
     return matchesSearch && matchesCategory;
-  });
+  }).sort((a, b) => (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0));
 
   // Header animation
   useEffect(() => {
@@ -367,9 +369,39 @@ export default function App() {
     }
   };
 
+  const [lastDeleted, setLastDeleted] = useState<Note | null>(null);
+
   const handleDelete = (id: string) => {
+    const deleted = notes.find(n => n.id === id);
+    if (deleted) setLastDeleted(deleted);
     saveNotes(notes.filter(n => n.id !== id));
     if (screen === 'view') setScreen('home');
+    // 5 saniye sonra geri alma seçeneği kaybolur
+    setTimeout(() => setLastDeleted(null), 5000);
+  };
+
+  const undoDelete = () => {
+    if (lastDeleted) {
+      saveNotes([lastDeleted, ...notes]);
+      setLastDeleted(null);
+    }
+  };
+
+  const toggleFavorite = (id: string) => {
+    saveNotes(notes.map(n => n.id === id ? { ...n, favorite: !n.favorite } : n));
+  };
+
+  const togglePin = (id: string) => {
+    saveNotes(notes.map(n => n.id === id ? { ...n, pinned: !n.pinned } : n));
+  };
+
+  const shareNote = async (item: Note) => {
+    try {
+      const { Share } = require('react-native');
+      await Share.share({
+        message: `${item.title || 'Başlıksız'}\n\n${item.text}\n\n— Pocket Belle 📖🌹`,
+      });
+    } catch (e) {}
   };
 
   const handleEdit = (item: Note) => {
@@ -419,6 +451,18 @@ export default function App() {
                 <Text style={styles.noteMood}>{categories.find(c => c.id === item.category)?.icon} {categories.find(c => c.id === item.category)?.name}</Text>
               </>
             )}
+          </View>
+          {/* Action buttons */}
+          <View style={styles.noteActions}>
+            <TouchableOpacity onPress={() => togglePin(item.id)}>
+              <Text style={{ fontSize: 14, opacity: item.pinned ? 1 : 0.3 }}>📌</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => toggleFavorite(item.id)}>
+              <Text style={{ fontSize: 14, opacity: item.favorite ? 1 : 0.3 }}>{item.favorite ? '⭐' : '☆'}</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => shareNote(item)}>
+              <Text style={{ fontSize: 14, opacity: 0.5 }}>📤</Text>
+            </TouchableOpacity>
           </View>
         </View>
         <TouchableOpacity style={styles.deleteButton} onPress={() => handleDelete(item.id)}>
@@ -767,11 +811,22 @@ export default function App() {
               </View>
             )}
           </View>
-          <View style={{ paddingHorizontal: 28, marginTop: 30 }}>
-            <TouchableOpacity
-              style={styles.deleteBottomButton}
-              onPress={() => handleDelete(viewingNote.id)}
-            >
+          <View style={styles.viewActions}>
+            <TouchableOpacity style={[styles.viewActionBtn, { backgroundColor: t.card }]} onPress={() => togglePin(viewingNote.id)}>
+              <Text style={{ fontSize: 18 }}>📌</Text>
+              <Text style={[styles.viewActionText, { color: t.text }]}>{viewingNote.pinned ? 'Sabitlendi' : 'Sabitle'}</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={[styles.viewActionBtn, { backgroundColor: t.card }]} onPress={() => toggleFavorite(viewingNote.id)}>
+              <Text style={{ fontSize: 18 }}>{viewingNote.favorite ? '⭐' : '☆'}</Text>
+              <Text style={[styles.viewActionText, { color: t.text }]}>{viewingNote.favorite ? 'Favorilerde' : 'Favorile'}</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={[styles.viewActionBtn, { backgroundColor: t.card }]} onPress={() => shareNote(viewingNote)}>
+              <Text style={{ fontSize: 18 }}>📤</Text>
+              <Text style={[styles.viewActionText, { color: t.text }]}>Paylaş</Text>
+            </TouchableOpacity>
+          </View>
+          <View style={{ alignItems: 'center', marginTop: 20, marginBottom: 30 }}>
+            <TouchableOpacity style={styles.deleteBottomButton} onPress={() => handleDelete(viewingNote.id)}>
               <Text style={styles.deleteBottomText}>{l.delete}</Text>
             </TouchableOpacity>
           </View>
@@ -1039,6 +1094,14 @@ export default function App() {
           <Text style={styles.tabLabel}>{l.statsTab}</Text>
         </TouchableOpacity>
       </View>
+
+      {/* Undo Delete */}
+      {lastDeleted && (
+        <TouchableOpacity style={styles.undoBar} onPress={undoDelete}>
+          <Text style={styles.undoText}>Not silindi</Text>
+          <Text style={styles.undoAction}>Geri Al</Text>
+        </TouchableOpacity>
+      )}
 
       {/* AI Analyzing */}
       {analyzing && (
@@ -1996,6 +2059,49 @@ const styles = StyleSheet.create({
   },
   voiceLabelActive: {
     color: '#e05555',
+  },
+  noteActions: {
+    flexDirection: 'row',
+    gap: 12,
+    marginTop: 8,
+  },
+  viewActions: {
+    flexDirection: 'row',
+    paddingHorizontal: 28,
+    marginTop: 24,
+    gap: 10,
+  },
+  viewActionBtn: {
+    flex: 1,
+    alignItems: 'center',
+    paddingVertical: 12,
+    borderRadius: 12,
+    gap: 4,
+  },
+  viewActionText: {
+    fontSize: 11,
+    fontWeight: '600',
+  },
+  undoBar: {
+    position: 'absolute',
+    bottom: 120,
+    left: 24,
+    right: 24,
+    backgroundColor: '#333',
+    borderRadius: 12,
+    padding: 14,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  undoText: {
+    color: '#fff',
+    fontSize: 14,
+  },
+  undoAction: {
+    color: '#ffe082',
+    fontSize: 14,
+    fontWeight: '700',
   },
   audioPlayBtn: {
     flexDirection: 'row',
