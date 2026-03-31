@@ -18,9 +18,9 @@
 
 | Metric | Value |
 |--------|-------|
-| Total Iterations | 2 |
-| Total Weight (kg) | 15 |
-| Total Time (min) | 30 |
+| Total Iterations | 3 |
+| Total Weight (kg) | 25 |
+| Total Time (min) | 45 |
 | Failed Attempts | 0 |
 
 ---
@@ -88,22 +88,24 @@ ekle (hamburger menü ikonu, ayarlar ikonu). Modern ve minimal tasarım.
 
 | Field | Value |
 |-------|-------|
-| Feature | |
-| Weight | |
-| Tool Used | |
-| Time | |
-| Attempts | |
-| Status | |
+| Feature | `List/scroll view — multiple notes with FlatList` |
+| Weight | `10 kg` |
+| Tool Used | `Claude Code` |
+| Time | `15 min` |
+| Attempts | `1` |
+| Status | ✅ Success |
 
 **Prompt given to AI:**
 ```
-
+Iteration 3: Tek not yerine birden fazla not kaydetme. FlatList ile notlar
+alt alta sıralansın. Her not kartında tarih ve saat bilgisi olsun. Renkli
+sol accent çizgi. Tam sayfa yazma ekranı — klavye sorunu olmasın.
 ```
 
 **What happened:**
-- 
+- FlatList ile çoklu not desteği eklendi. Her not tarih/saat bilgisiyle kaydediliyor. Yazma ekranı tam sayfa olarak ayrıldı — modal yerine screen geçişi yapıldı. Boş durum mesajı eklendi.
 
-**Screenshot:**
+**Screenshot:** `[Expo Go'dan ekran görüntüsü ekle]`
 
 **Commit:**
 
