@@ -18,9 +18,9 @@
 
 | Metric | Value |
 |--------|-------|
-| Total Iterations | 1 |
-| Total Weight (kg) | 5 |
-| Total Time (min) | 15 |
+| Total Iterations | 2 |
+| Total Weight (kg) | 15 |
+| Total Time (min) | 30 |
 | Failed Attempts | 0 |
 
 ---
@@ -61,22 +61,24 @@ Belle'in bal sarısı renk şeması, açık kitap + pembe gül SVG ikonu ile.
 
 | Field | Value |
 |-------|-------|
-| Feature | |
-| Weight | |
-| Tool Used | |
-| Time | |
-| Attempts | |
-| Status | |
+| Feature | `Text input/output — not yazma ve görüntüleme` |
+| Weight | `10 kg` |
+| Tool Used | `Claude Code` |
+| Time | `15 min` |
+| Attempts | `1` |
+| Status | ✅ Success |
 
 **Prompt given to AI:**
 ```
-
+Iteration 2: Ana ekrana text input alanı ekle. Kullanıcı not yazsın,
+kaydet butonuna bassın, not ekranda görünsün. Üst kısma header bar
+ekle (hamburger menü ikonu, ayarlar ikonu). Modern ve minimal tasarım.
 ```
 
 **What happened:**
-- 
+- Text input alanı, kaydet butonu ve not kartı eklendi. Üst kısma hamburger menü ve ayarlar ikonlu header bar eklendi. ScrollView ile uzun içerik desteklendi. Disabled buton state eklendi.
 
-**Screenshot:**
+**Screenshot:** `[Expo Go'dan ekran görüntüsü ekle]`
 
 **Commit:**
 
