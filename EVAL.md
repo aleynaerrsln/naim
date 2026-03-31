@@ -40,12 +40,12 @@ Fill this BEFORE submitting. Your honest self-score vs instructor score will be 
 
 | Criteria | 0 | 5 | 10 | Self |
 |----------|---|---|-----|------|
-| **Prompts documented** — exact prompts recorded for every iteration | No prompts | Some prompts, vague | Every iteration has exact prompt | /10 |
-| **Results documented** — what worked, what broke, how many attempts | No results | Some notes, incomplete | Every iteration has clear outcome | /10 |
-| **Screenshots/evidence** — visual proof for each iteration | None | Some | Every iteration has proof | /10 |
-| **Reflection depth** — honest analysis, not generic filler | Empty or "it was good" | Surface-level | Specific insights about AI behavior | /10 |
+| **Prompts documented** — exact prompts recorded for every iteration | No prompts | Some prompts, vague | Every iteration has exact prompt | 9/10 |
+| **Results documented** — what worked, what broke, how many attempts | No results | Some notes, incomplete | Every iteration has clear outcome | 9/10 |
+| **Screenshots/evidence** — visual proof for each iteration | None | Some | Every iteration has proof | 7/10 |
+| **Reflection depth** — honest analysis, not generic filler | Empty or "it was good" | Surface-level | Specific insights about AI behavior | 9/10 |
 
-**Subtotal A: ___ /40**
+**Subtotal A: 34 /40**
 
 ---
 
@@ -59,7 +59,7 @@ Fill this BEFORE submitting. Your honest self-score vs instructor score will be 
 | 61 - 100 kg | 16 |
 | 101+ kg | 20 |
 
-**Subtotal B: ___ /20**
+**Subtotal B: 20 /20**
 
 ---
 
@@ -75,7 +75,7 @@ Fill this BEFORE submitting. Your honest self-score vs instructor score will be 
 
 *5 rushed iterations with bad logs < 3 solid iterations with great logs. Quality beats quantity.*
 
-**Subtotal C: ___ /15**
+**Subtotal C: 15 /15**
 
 ---
 
@@ -83,10 +83,10 @@ Fill this BEFORE submitting. Your honest self-score vs instructor score will be 
 
 | Criteria | 0 | 2-3 | 5 | Self |
 |----------|---|-----|---|------|
-| **Commit format** — `[NAIM: Name] Feature - Xkg` | Random messages | Some follow format | All follow format | /5 |
-| **Incremental commits** — one per iteration | Single dump at end | Some incremental | Every iteration = commit | /5 |
+| **Commit format** — `[NAIM: Name] Feature - Xkg` | Random messages | Some follow format | All follow format | 5/5 |
+| **Incremental commits** — one per iteration | Single dump at end | Some incremental | Every iteration = commit | 5/5 |
 
-**Subtotal D: ___ /10**
+**Subtotal D: 10 /10**
 
 ---
 
@@ -94,11 +94,11 @@ Fill this BEFORE submitting. Your honest self-score vs instructor score will be 
 
 | Criteria | 0 | 3 | 5 | Self |
 |----------|---|---|---|------|
-| **Feature originality** — beyond copy-paste from ROADMAP | Only basics | Some creative | Something nobody else did | /5 |
-| **Tool switching** — adapted when tool failed or hit limits | Gave up | Tried once | Smooth switch, documented why | /5 |
-| **Prompt evolution** — prompts improved over iterations | Same vague prompts | Some refinement | Clear learning curve | /5 |
+| **Feature originality** — beyond copy-paste from ROADMAP | Only basics | Some creative | Something nobody else did | 5/5 |
+| **Tool switching** — adapted when tool failed or hit limits | Gave up | Tried once | Smooth switch, documented why | 5/5 |
+| **Prompt evolution** — prompts improved over iterations | Same vague prompts | Some refinement | Clear learning curve | 4/5 |
 
-**Subtotal E: ___ /15**
+**Subtotal E: 14 /15**
 
 ---
 
@@ -106,12 +106,12 @@ Fill this BEFORE submitting. Your honest self-score vs instructor score will be 
 
 | Section | Max | Self | Instructor |
 |---------|-----|------|------------|
-| A. Iteration Quality | 40 | | |
-| B. Weight Lifted | 20 | | |
-| C. Iteration Count | 15 | | |
-| D. Commit Discipline | 10 | | |
-| E. Creativity & Tool Mastery | 15 | | |
-| **TOTAL** | **100** | | |
+| A. Iteration Quality | 40 | 34 | |
+| B. Weight Lifted | 20 | 20 | |
+| C. Iteration Count | 15 | 15 | |
+| D. Commit Discipline | 10 | 10 | |
+| E. Creativity & Tool Mastery | 15 | 14 | |
+| **TOTAL** | **100** | **93** | |
 
 ---
 
