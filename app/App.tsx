@@ -178,7 +178,7 @@ export default function App() {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': 'Bearer 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',
+            'Authorization': 'Bearer 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',
           },
           body: JSON.stringify({
             model: 'google/gemini-2.0-flash-001',
@@ -633,37 +633,39 @@ export default function App() {
       <SafeAreaView style={[styles.container, { backgroundColor: t.bg }]}>
         <StatusBar style={t.statusBar} />
         <View style={styles.writeTopBar}>
-          <TouchableOpacity onPress={() => setScreen('home')}>
-            <Text style={styles.backButton}>← Geri</Text>
+          <TouchableOpacity onPress={() => { Keyboard.dismiss(); setScreen('home'); }}>
+            <Text style={[styles.backButton, { color: t.accent }]}>{l.back}</Text>
           </TouchableOpacity>
-          <Text style={styles.writeTopBarTitle}>{l.noteDetail}</Text>
+          <Text style={[styles.writeTopBarTitle, { color: t.text }]}>{l.noteDetail}</Text>
           <TouchableOpacity onPress={() => handleEdit(viewingNote)}>
-            <Text style={styles.saveTopButton}>{l.edit}</Text>
+            <Text style={[styles.saveTopButton, { color: t.accent }]}>{l.edit}</Text>
           </TouchableOpacity>
         </View>
-        <View style={styles.writeDateRow}>
-          <Text style={styles.writeDateText}>{viewingNote.date} · {viewingNote.time}</Text>
-        </View>
-        <View style={styles.viewContent}>
-          {viewingNote.image && (
-            <Image source={{ uri: viewingNote.image }} style={styles.viewImage} />
-          )}
-          <Text style={styles.viewTitle}>{viewingNote.title || 'Başlıksız'}</Text>
-          <Text style={styles.viewText}>{viewingNote.text}</Text>
-          {viewingNote.ai && (
-            <View style={styles.aiCard}>
-              <Text style={styles.aiCardEmoji}>{viewingNote.ai.emoji}</Text>
-              <Text style={styles.aiCardMood}>Ruh hali: {viewingNote.ai.mood}</Text>
-              <Text style={styles.aiCardMessage}>{viewingNote.ai.message}</Text>
-            </View>
-          )}
-        </View>
-        <TouchableOpacity
-          style={styles.deleteBottomButton}
-          onPress={() => handleDelete(viewingNote.id)}
-        >
-          <Text style={styles.deleteBottomText}>{l.delete}</Text>
-        </TouchableOpacity>
+        <ScrollView contentContainerStyle={{ paddingBottom: 40 }} showsVerticalScrollIndicator={false}>
+          <View style={styles.writeDateRow}>
+            <Text style={[styles.writeDateText, { color: t.textMuted }]}>{viewingNote.date} · {viewingNote.time}</Text>
+          </View>
+          <View style={styles.viewContent}>
+            {viewingNote.image && (
+              <Image source={{ uri: viewingNote.image }} style={styles.viewImage} />
+            )}
+            <Text style={[styles.viewTitle, { color: t.accent }]}>{viewingNote.title || l.untitled}</Text>
+            <Text style={[styles.viewText, { color: t.text }]}>{viewingNote.text}</Text>
+            {viewingNote.ai && (
+              <View style={[styles.aiCard, { backgroundColor: t.card, borderColor: t.accent + '20' }]}>
+                <Text style={styles.aiCardEmoji}>{viewingNote.ai.emoji}</Text>
+                <Text style={[styles.aiCardMood, { color: t.accent }]}>{l.mood}: {viewingNote.ai.mood}</Text>
+                <Text style={[styles.aiCardMessage, { color: t.textSecondary }]}>{viewingNote.ai.message}</Text>
+              </View>
+            )}
+          </View>
+          <TouchableOpacity
+            style={styles.deleteBottomButton}
+            onPress={() => handleDelete(viewingNote.id)}
+          >
+            <Text style={styles.deleteBottomText}>{l.delete}</Text>
+          </TouchableOpacity>
+        </ScrollView>
       </SafeAreaView>
     );
   }
@@ -997,12 +999,17 @@ const styles = StyleSheet.create({
     paddingBottom: 12,
   },
   iconButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 12,
+    width: 42,
+    height: 42,
+    borderRadius: 14,
     backgroundColor: '#1a1a38',
     alignItems: 'center',
     justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
+    elevation: 2,
   },
   topBarTitle: {
     fontSize: 16,
@@ -1239,9 +1246,14 @@ const styles = StyleSheet.create({
   statCard: {
     flex: 1,
     backgroundColor: '#1a1a38',
-    borderRadius: 14,
-    padding: 18,
+    borderRadius: 18,
+    padding: 20,
     alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 3,
   },
   statNumber: {
     color: '#ffe082',
@@ -1267,9 +1279,14 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#1a1a38',
-    borderRadius: 12,
+    borderRadius: 14,
     padding: 14,
-    marginBottom: 8,
+    marginBottom: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
+    elevation: 2,
   },
   moodEmoji: {
     fontSize: 24,
@@ -1293,11 +1310,16 @@ const styles = StyleSheet.create({
   quoteCard: {
     width: '100%',
     backgroundColor: '#1a1a38',
-    borderRadius: 16,
+    borderRadius: 18,
     padding: 20,
     marginTop: 20,
     borderWidth: 1,
     borderColor: '#ffe08215',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 2,
   },
   quoteIcon: {
     color: '#ffe082',
@@ -1324,9 +1346,14 @@ const styles = StyleSheet.create({
     marginHorizontal: 24,
     marginBottom: 12,
     backgroundColor: '#1a1a38',
-    borderRadius: 12,
+    borderRadius: 14,
     paddingHorizontal: 16,
-    height: 44,
+    height: 46,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
+    elevation: 2,
   },
   searchInput: {
     flex: 1,
@@ -1473,13 +1500,18 @@ const styles = StyleSheet.create({
   // ===== NOTE CARDS =====
   noteCard: {
     backgroundColor: '#1a1a38',
-    borderRadius: 14,
-    padding: 16,
-    marginBottom: 12,
+    borderRadius: 18,
+    padding: 18,
+    marginBottom: 14,
     flexDirection: 'row',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 3,
   },
   noteAccent: {
-    width: 3,
+    width: 4,
     borderRadius: 2,
     marginRight: 14,
     alignSelf: 'stretch',
@@ -1489,19 +1521,22 @@ const styles = StyleSheet.create({
   },
   noteTitle: {
     color: '#ffe082',
-    fontSize: 16,
+    fontSize: 17,
     fontWeight: '700',
-    marginBottom: 4,
+    marginBottom: 6,
   },
   noteText: {
     color: '#9999bb',
     fontSize: 14,
-    lineHeight: 20,
+    lineHeight: 21,
   },
   noteMeta: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 10,
+    marginTop: 12,
+    paddingTop: 10,
+    borderTopWidth: 1,
+    borderTopColor: '#ffffff08',
   },
   noteDate: {
     color: '#6b6b8a',
@@ -1520,27 +1555,27 @@ const styles = StyleSheet.create({
   // ===== FAB =====
   fab: {
     position: 'absolute',
-    bottom: 115,
+    bottom: 110,
     right: 24,
-    width: 48,
-    height: 48,
-    borderRadius: 24,
+    width: 54,
+    height: 54,
+    borderRadius: 27,
     shadowColor: '#ffe082',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.4,
-    shadowRadius: 10,
-    elevation: 8,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.5,
+    shadowRadius: 14,
+    elevation: 10,
   },
   fabInner: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
+    width: 54,
+    height: 54,
+    borderRadius: 27,
     backgroundColor: '#ffe082',
     alignItems: 'center',
     justifyContent: 'center',
   },
   fabText: {
-    fontSize: 28,
+    fontSize: 30,
     color: '#12122a',
     fontWeight: '600',
     marginTop: -2,
@@ -1567,12 +1602,17 @@ const styles = StyleSheet.create({
   },
   aiCard: {
     backgroundColor: '#1a1a38',
-    borderRadius: 14,
-    padding: 16,
-    marginTop: 20,
+    borderRadius: 18,
+    padding: 20,
+    marginTop: 24,
     borderWidth: 1,
     borderColor: '#ffe08220',
     alignItems: 'center',
+    shadowColor: '#ffe082',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
+    elevation: 3,
   },
   aiCardEmoji: {
     fontSize: 32,

@@ -1,4 +1,4 @@
-const OPENROUTER_KEY = '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';
+const OPENROUTER_KEY = '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';
 const API_URL = 'https://openrouter.ai/api/v1/chat/completions';
 
 const SYSTEM_PROMPT = `Sen "Belle" adında bir yapay zeka asistanısın. Güzel ve Çirkin filmindeki Belle gibi nazik, zeki ve kitap sever bir karaktersin.
