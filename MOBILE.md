@@ -18,9 +18,9 @@
 
 | Metric | Value |
 |--------|-------|
-| Total Iterations | 12 |
-| Total Weight (kg) | 160 |
-| Total Time (min) | 180 |
+| Total Iterations | 13 |
+| Total Weight (kg) | 175 |
+| Total Time (min) | 195 |
 | Failed Attempts | 0 |
 
 ---
@@ -345,6 +345,33 @@ Ana sayfada kategori filtreleme chip'leri.
 **Screenshot:** `[Expo Go'dan ekran görüntüsü ekle]`
 
 **Commit:** `[NAIM: Aleyna Pocket Belle] Added image support and category system - 25kg`
+
+---
+
+### 🏋️ Iteration 13
+
+| Field | Value |
+|-------|-------|
+| Feature | `Voice input — Belle'e Söyle AI-powered voice-to-note` |
+| Weight | `15 kg` |
+| Tool Used | `Claude Code + OpenRouter Gemini` |
+| Time | `15 min` |
+| Attempts | `3` |
+| Status | ⚠️ Partial (expo-audio native module issue in Expo Go, AI text conversion works) |
+
+**Prompt given to AI:**
+```
+Iteration 13: Sesle not ekleme özelliği. Mikrofon ile kaydet, Gemini ile
+metne çevir. Expo Go native modül kısıtlaması nedeniyle alternatif
+Belle'e Söyle özelliği — kısa metin yaz, AI güzel paragrafa çevirsin.
+```
+
+**What happened:**
+- expo-speech-recognition native modül hatası verdi. expo-av deprecated. expo-audio hook Expo Go'da çalışmadı. Alternatif olarak "Belle'e Söyle" özelliği eklendi — kullanıcı kısa not yazar, Gemini güzel paragrafa çevirir. Gerçek ses kaydı development build gerektirir.
+
+**Screenshot:** `[Expo Go'dan ekran görüntüsü ekle]`
+
+**Commit:** `[NAIM: Aleyna Pocket Belle] Added voice input Belle'e Söyle feature - 15kg`
 
 ---
 

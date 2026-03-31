@@ -96,6 +96,47 @@ export default function App() {
   const [noteCategory, setNoteCategory] = useState('personal');
   const [newCatName, setNewCatName] = useState('');
   const [newCatIcon, setNewCatIcon] = useState('📝');
+  const [isRecording, setIsRecording] = useState(false);
+  const [voiceText, setVoiceText] = useState('');
+  const [showVoiceModal, setShowVoiceModal] = useState(false);
+
+  const toggleVoice = () => {
+    if (showVoiceModal) {
+      // Gemini'ye gönder, sesli komut gibi yorumlasın
+      if (voiceText.trim()) {
+        setNote(prev => prev + (prev ? '\n' : '') + '⏳ Belle yazıyor...');
+        fetch('https://openrouter.ai/api/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer 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',
+          },
+          body: JSON.stringify({
+            model: 'google/gemini-2.0-flash-001',
+            messages: [
+              { role: 'system', content: 'Kullanıcı sana sesli komut veriyor gibi kısa bir not söyledi. Bunu düzgün, güzel Türkçe ile bir günlük not paragrafına çevir. Sadece notu yaz.' },
+              { role: 'user', content: voiceText },
+            ],
+          }),
+        })
+          .then(res => res.json())
+          .then(data => {
+            const result = data.choices?.[0]?.message?.content || voiceText;
+            setNote(prev => {
+              const cleaned = prev.replace('⏳ Belle yazıyor...', '').trim();
+              return cleaned + (cleaned ? '\n' : '') + result;
+            });
+          })
+          .catch(() => {
+            setNote(prev => prev.replace('⏳ Belle yazıyor...', voiceText));
+          });
+      }
+      setShowVoiceModal(false);
+      setVoiceText('');
+    } else {
+      setShowVoiceModal(true);
+    }
+  };
   const [editingId, setEditingId] = useState<string | null>(null);
   const [viewingNote, setViewingNote] = useState<Note | null>(null);
   const [loaded, setLoaded] = useState(false);
@@ -566,14 +607,52 @@ export default function App() {
             scrollEnabled={false}
           />
 
-          {/* Save Button */}
-          <TouchableOpacity
-            style={[styles.writeSaveButton, !note.trim() && styles.writeSaveDisabled]}
-            onPress={() => { Keyboard.dismiss(); handleSave(); }}
-            disabled={!note.trim()}
-          >
-            <Text style={[styles.writeSaveText, !note.trim() && styles.writeSaveTextDisabled]}>Kaydet</Text>
-          </TouchableOpacity>
+          {/* Voice Input Modal */}
+          {showVoiceModal && (
+            <View style={styles.voiceModal}>
+              <Text style={styles.voiceModalTitle}>🎤 Belle'e Söyle</Text>
+              <Text style={styles.voiceModalDesc}>Ne düşünüyorsun? Kısaca söyle, Belle güzel bir nota çevirsin.</Text>
+              <TextInput
+                style={styles.voiceModalInput}
+                placeholder="Örn: bugün çok yorgunum ama mutluyum"
+                placeholderTextColor="#6b6b8a"
+                value={voiceText}
+                onChangeText={setVoiceText}
+                multiline
+                autoFocus
+              />
+              <View style={styles.voiceModalButtons}>
+                <TouchableOpacity style={styles.voiceModalCancel} onPress={() => { setShowVoiceModal(false); setVoiceText(''); }}>
+                  <Text style={styles.voiceModalCancelText}>İptal</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.voiceModalSend, !voiceText.trim() && { opacity: 0.4 }]}
+                  onPress={toggleVoice}
+                  disabled={!voiceText.trim()}
+                >
+                  <Text style={styles.voiceModalSendText}>Belle'e Gönder</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          )}
+
+          {/* Voice + Save Buttons */}
+          <View style={styles.writeActions}>
+            {!showVoiceModal && (
+              <TouchableOpacity style={styles.voiceButton} onPress={toggleVoice}>
+                <Text style={styles.voiceButtonText}>🎤</Text>
+                <Text style={styles.voiceLabel}>Belle'e Söyle</Text>
+              </TouchableOpacity>
+            )}
+
+            <TouchableOpacity
+              style={[styles.writeSaveButton, !note.trim() && styles.writeSaveDisabled]}
+              onPress={() => { Keyboard.dismiss(); handleSave(); }}
+              disabled={!note.trim()}
+            >
+              <Text style={[styles.writeSaveText, !note.trim() && styles.writeSaveTextDisabled]}>Kaydet</Text>
+            </TouchableOpacity>
+          </View>
         </ScrollView>
       </SafeAreaView>
     );
@@ -1344,11 +1423,94 @@ const styles = StyleSheet.create({
     fontSize: 22,
     fontWeight: '800',
   },
-  writeSaveButton: {
-    backgroundColor: '#ffe082',
-    marginHorizontal: 28,
+  writeActions: {
+    paddingHorizontal: 28,
     marginTop: 20,
     marginBottom: 40,
+    gap: 12,
+  },
+  voiceButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: '#2a2a50',
+    gap: 8,
+  },
+  voiceButtonText: {
+    fontSize: 18,
+  },
+  voiceLabel: {
+    color: '#7777aa',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  voiceModal: {
+    marginHorizontal: 28,
+    marginTop: 16,
+    backgroundColor: '#1a1a38',
+    borderRadius: 16,
+    padding: 18,
+    borderWidth: 1,
+    borderColor: '#ffe08230',
+  },
+  voiceModalTitle: {
+    color: '#ffe082',
+    fontSize: 18,
+    fontWeight: '700',
+    marginBottom: 6,
+  },
+  voiceModalDesc: {
+    color: '#7777aa',
+    fontSize: 13,
+    marginBottom: 14,
+    lineHeight: 18,
+  },
+  voiceModalInput: {
+    backgroundColor: '#12122a',
+    borderRadius: 12,
+    padding: 14,
+    color: '#f0e6d3',
+    fontSize: 15,
+    minHeight: 80,
+    textAlignVertical: 'top',
+    borderWidth: 1,
+    borderColor: '#2a2a50',
+  },
+  voiceModalButtons: {
+    flexDirection: 'row',
+    gap: 10,
+    marginTop: 14,
+  },
+  voiceModalCancel: {
+    flex: 1,
+    paddingVertical: 12,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#2a2a50',
+    alignItems: 'center',
+  },
+  voiceModalCancelText: {
+    color: '#7777aa',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  voiceModalSend: {
+    flex: 1,
+    paddingVertical: 12,
+    borderRadius: 12,
+    backgroundColor: '#ffe082',
+    alignItems: 'center',
+  },
+  voiceModalSendText: {
+    color: '#12122a',
+    fontSize: 14,
+    fontWeight: '700',
+  },
+  writeSaveButton: {
+    backgroundColor: '#ffe082',
     paddingVertical: 14,
     borderRadius: 14,
     alignItems: 'center',
