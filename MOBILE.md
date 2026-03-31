@@ -18,9 +18,9 @@
 
 | Metric | Value |
 |--------|-------|
-| Total Iterations | 3 |
-| Total Weight (kg) | 25 |
-| Total Time (min) | 45 |
+| Total Iterations | 4 |
+| Total Weight (kg) | 35 |
+| Total Time (min) | 60 |
 | Failed Attempts | 0 |
 
 ---
@@ -107,7 +107,33 @@ sol accent çizgi. Tam sayfa yazma ekranı — klavye sorunu olmasın.
 
 **Screenshot:** `[Expo Go'dan ekran görüntüsü ekle]`
 
-**Commit:**
+**Commit:** `[NAIM: Aleyna Pocket Belle] Added list view with multiple notes support - 10kg`
+
+---
+
+### 🏋️ Iteration 4
+
+| Field | Value |
+|-------|-------|
+| Feature | `Delete/edit functionality with note detail view` |
+| Weight | `10 kg` |
+| Tool Used | `Claude Code` |
+| Time | `15 min` |
+| Attempts | `1` |
+| Status | ✅ Success |
+
+**Prompt given to AI:**
+```
+Iteration 4: Notlara tıklayınca detay ekranı açılsın. Düzenleme ve silme
+butonu ekle. Hamburger menü ve ayarlar ikonlarını SVG ile modern yap.
+```
+
+**What happened:**
+- Not kartlarına tıklama ile detay ekranı eklendi. Düzenleme ve silme özellikleri eklendi. Top bar ikonları SVG ile modern Feather icon tarzında yeniden tasarlandı.
+
+**Screenshot:** `[Expo Go'dan ekran görüntüsü ekle]`
+
+**Commit:** `[NAIM: Aleyna Pocket Belle] Added delete and edit functionality - 10kg`
 
 ---
 
