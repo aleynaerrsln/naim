@@ -14,6 +14,7 @@ import {
 } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 import BelleRose from './components/BelleRose';
+import { analyzeNote, AIResponse } from './utils/gemini';
 
 const MenuIcon = () => (
   <Svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke="#9999bb" strokeWidth={2} strokeLinecap="round">
@@ -33,6 +34,7 @@ interface Note {
   text: string;
   date: string;
   time: string;
+  ai?: AIResponse;
 }
 
 const formatDate = () => {
@@ -119,7 +121,9 @@ export default function App() {
     setNotes(updatedNotes);
   }, []);
 
-  const handleSave = () => {
+  const [analyzing, setAnalyzing] = useState(false);
+
+  const handleSave = async () => {
     if (note.trim()) {
       if (editingId) {
         saveNotes(notes.map(n => n.id === editingId
@@ -136,6 +140,17 @@ export default function App() {
           time: formatTime(),
         };
         saveNotes([newNote, ...notes]);
+
+        // AI analiz arka planda
+        setAnalyzing(true);
+        analyzeNote(note.trim()).then(ai => {
+          setNotes(prev => {
+            const updated = prev.map(n => n.id === newNote.id ? { ...n, ai } : n);
+            SecureStore.setItemAsync(STORAGE_KEY, JSON.stringify(updated));
+            return updated;
+          });
+          setAnalyzing(false);
+        });
       }
       setNote('');
       setTitle('');
@@ -168,12 +183,24 @@ export default function App() {
       <TouchableOpacity style={styles.noteCard} onPress={() => handleView(item)}>
         <View style={[styles.noteAccent, { backgroundColor: accentColor }]} />
         <View style={styles.noteContent}>
-          <Text style={styles.noteTitle}>{item.title || 'Başlıksız'}</Text>
+          <View style={styles.noteTitleRow}>
+            <Text style={styles.noteTitle}>{item.title || 'Başlıksız'}</Text>
+            {item.ai && <Text style={styles.noteEmoji}>{item.ai.emoji}</Text>}
+          </View>
           <Text style={styles.noteText} numberOfLines={2}>{item.text}</Text>
+          {item.ai && (
+            <Text style={styles.noteAiMessage}>{item.ai.message}</Text>
+          )}
           <View style={styles.noteMeta}>
             <Text style={styles.noteDate}>{item.date}</Text>
             <Text style={styles.noteDot}>·</Text>
             <Text style={styles.noteTime}>{item.time}</Text>
+            {item.ai && (
+              <>
+                <Text style={styles.noteDot}>·</Text>
+                <Text style={styles.noteMood}>{item.ai.mood}</Text>
+              </>
+            )}
           </View>
         </View>
         <TouchableOpacity style={styles.deleteButton} onPress={() => handleDelete(item.id)}>
@@ -203,6 +230,13 @@ export default function App() {
         <View style={styles.viewContent}>
           <Text style={styles.viewTitle}>{viewingNote.title || 'Başlıksız'}</Text>
           <Text style={styles.viewText}>{viewingNote.text}</Text>
+          {viewingNote.ai && (
+            <View style={styles.aiCard}>
+              <Text style={styles.aiCardEmoji}>{viewingNote.ai.emoji}</Text>
+              <Text style={styles.aiCardMood}>Ruh hali: {viewingNote.ai.mood}</Text>
+              <Text style={styles.aiCardMessage}>{viewingNote.ai.message}</Text>
+            </View>
+          )}
         </View>
         <TouchableOpacity
           style={styles.deleteBottomButton}
@@ -334,6 +368,13 @@ export default function App() {
           </View>
         }
       />
+
+      {/* AI Analyzing */}
+      {analyzing && (
+        <View style={styles.analyzingBar}>
+          <Text style={styles.analyzingText}>✨ Belle notunu analiz ediyor...</Text>
+        </View>
+      )}
 
       {/* Floating Add Button */}
       <Animated.View style={[styles.fab, { transform: [{ scale: fabScale }] }]}>
@@ -558,6 +599,65 @@ const styles = StyleSheet.create({
     color: '#12122a',
     fontWeight: '600',
     marginTop: -2,
+  },
+
+  // ===== AI =====
+  noteTitleRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  noteEmoji: {
+    fontSize: 18,
+  },
+  noteAiMessage: {
+    color: '#8888aa',
+    fontSize: 12,
+    fontStyle: 'italic',
+    marginTop: 6,
+  },
+  noteMood: {
+    color: '#ffe082',
+    fontSize: 12,
+  },
+  aiCard: {
+    backgroundColor: '#1a1a38',
+    borderRadius: 14,
+    padding: 16,
+    marginTop: 20,
+    borderWidth: 1,
+    borderColor: '#ffe08220',
+    alignItems: 'center',
+  },
+  aiCardEmoji: {
+    fontSize: 32,
+    marginBottom: 8,
+  },
+  aiCardMood: {
+    color: '#ffe082',
+    fontSize: 14,
+    fontWeight: '600',
+    marginBottom: 6,
+  },
+  aiCardMessage: {
+    color: '#d0c8b8',
+    fontSize: 14,
+    textAlign: 'center',
+    lineHeight: 22,
+  },
+  analyzingBar: {
+    position: 'absolute',
+    bottom: 110,
+    left: 24,
+    right: 24,
+    backgroundColor: '#1a1a38',
+    borderRadius: 12,
+    padding: 12,
+    alignItems: 'center',
+  },
+  analyzingText: {
+    color: '#ffe082',
+    fontSize: 13,
   },
 
   // ===== DELETE BUTTON =====
