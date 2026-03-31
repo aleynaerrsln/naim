@@ -22,6 +22,19 @@ const MenuIcon = () => (
   </Svg>
 );
 
+const HomeIcon = ({ active }: { active: boolean }) => (
+  <Svg width={22} height={22} viewBox="0 0 24 24" fill="none" stroke={active ? '#ffe082' : '#6b6b8a'} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+    <Path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
+    <Path d="M9 22V12h6v10" />
+  </Svg>
+);
+
+const StatsIcon = ({ active }: { active: boolean }) => (
+  <Svg width={22} height={22} viewBox="0 0 24 24" fill="none" stroke={active ? '#ffe082' : '#6b6b8a'} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+    <Path d="M18 20V10M12 20V4M6 20v-6" />
+  </Svg>
+);
+
 const SearchIcon = () => (
   <Svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke="#9999bb" strokeWidth={2} strokeLinecap="round">
     <Path d="M11 19a8 8 0 100-16 8 8 0 000 16zM21 21l-4.35-4.35" />
@@ -53,7 +66,8 @@ const STORAGE_KEY = 'pocket_belle_notes';
 export default function App() {
   const [note, setNote] = useState('');
   const [notes, setNotes] = useState<Note[]>([]);
-  const [screen, setScreen] = useState<'home' | 'write' | 'view'>('home');
+  const [screen, setScreen] = useState<'home' | 'write' | 'view' | 'stats'>('home');
+  const [activeTab, setActiveTab] = useState<'home' | 'stats'>('home');
   const [editingId, setEditingId] = useState<string | null>(null);
   const [viewingNote, setViewingNote] = useState<Note | null>(null);
   const [loaded, setLoaded] = useState(false);
@@ -209,6 +223,88 @@ export default function App() {
       </TouchableOpacity>
     );
   };
+
+  // ========== STATS SCREEN ==========
+  if (screen === 'stats') {
+    const moodCounts: Record<string, number> = {};
+    notes.forEach(n => {
+      if (n.ai?.mood) {
+        moodCounts[n.ai.mood] = (moodCounts[n.ai.mood] || 0) + 1;
+      }
+    });
+    const topMood = Object.entries(moodCounts).sort((a, b) => b[1] - a[1])[0];
+
+    return (
+      <SafeAreaView style={styles.container}>
+        <StatusBar style="light" />
+        <View style={styles.topBar}>
+          <View style={styles.iconButton} />
+          <Text style={styles.topBarTitle}>İstatistikler</Text>
+          <View style={styles.iconButton} />
+        </View>
+
+        <FlatList
+          data={[]}
+          renderItem={() => null}
+          contentContainerStyle={styles.listContent}
+          ListHeaderComponent={
+            <View>
+              {/* Summary Cards */}
+              <View style={styles.statsGrid}>
+                <View style={styles.statCard}>
+                  <Text style={styles.statNumber}>{notes.length}</Text>
+                  <Text style={styles.statLabel}>Toplam Not</Text>
+                </View>
+                <View style={styles.statCard}>
+                  <Text style={styles.statNumber}>{Object.keys(moodCounts).length}</Text>
+                  <Text style={styles.statLabel}>Farklı Ruh Hali</Text>
+                </View>
+              </View>
+
+              <View style={styles.statsGrid}>
+                <View style={styles.statCard}>
+                  <Text style={styles.statNumber}>{topMood ? topMood[0] : '—'}</Text>
+                  <Text style={styles.statLabel}>En Sık Ruh Hali</Text>
+                </View>
+                <View style={styles.statCard}>
+                  <Text style={styles.statNumber}>{notes.reduce((sum, n) => sum + n.text.length, 0)}</Text>
+                  <Text style={styles.statLabel}>Toplam Karakter</Text>
+                </View>
+              </View>
+
+              {/* Mood History */}
+              {notes.some(n => n.ai) && (
+                <View style={styles.moodHistorySection}>
+                  <Text style={styles.statsSubtitle}>Ruh Hali Geçmişi</Text>
+                  {notes.filter(n => n.ai).map(n => (
+                    <View key={n.id} style={styles.moodRow}>
+                      <Text style={styles.moodEmoji}>{n.ai?.emoji}</Text>
+                      <View style={styles.moodInfo}>
+                        <Text style={styles.moodTitle}>{n.title || 'Başlıksız'}</Text>
+                        <Text style={styles.moodDate}>{n.date} · {n.ai?.mood}</Text>
+                      </View>
+                    </View>
+                  ))}
+                </View>
+              )}
+            </View>
+          }
+        />
+
+        {/* Tab Bar */}
+        <View style={styles.tabBar}>
+          <TouchableOpacity style={styles.tabItem} onPress={() => { setScreen('home'); setActiveTab('home'); }}>
+            <HomeIcon active={false} />
+            <Text style={styles.tabLabel}>Ana Sayfa</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.tabItem} onPress={() => {}}>
+            <StatsIcon active={true} />
+            <Text style={styles.tabLabelActive}>İstatistik</Text>
+          </TouchableOpacity>
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   // ========== VIEW SCREEN ==========
   if (screen === 'view' && viewingNote) {
@@ -369,6 +465,18 @@ export default function App() {
         }
       />
 
+      {/* Tab Bar */}
+      <View style={styles.tabBar}>
+        <TouchableOpacity style={styles.tabItem} onPress={() => {}}>
+          <HomeIcon active={true} />
+          <Text style={styles.tabLabelActive}>Ana Sayfa</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.tabItem} onPress={() => { setScreen('stats'); setActiveTab('stats'); }}>
+          <StatsIcon active={false} />
+          <Text style={styles.tabLabel}>İstatistik</Text>
+        </TouchableOpacity>
+      </View>
+
       {/* AI Analyzing */}
       {analyzing && (
         <View style={styles.analyzingBar}>
@@ -417,6 +525,91 @@ const styles = StyleSheet.create({
     color: '#9999bb',
     fontWeight: '600',
     letterSpacing: 0.5,
+  },
+
+  // ===== TAB BAR =====
+  tabBar: {
+    flexDirection: 'row',
+    backgroundColor: '#1a1a38',
+    borderTopWidth: 1,
+    borderTopColor: '#2a2a50',
+    paddingBottom: Platform.OS === 'ios' ? 20 : 10,
+    paddingTop: 10,
+  },
+  tabItem: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  tabLabel: {
+    color: '#6b6b8a',
+    fontSize: 11,
+    marginTop: 4,
+  },
+  tabLabelActive: {
+    color: '#ffe082',
+    fontSize: 11,
+    marginTop: 4,
+    fontWeight: '600',
+  },
+
+  // ===== STATS =====
+  statsGrid: {
+    flexDirection: 'row',
+    gap: 12,
+    marginBottom: 12,
+  },
+  statCard: {
+    flex: 1,
+    backgroundColor: '#1a1a38',
+    borderRadius: 14,
+    padding: 18,
+    alignItems: 'center',
+  },
+  statNumber: {
+    color: '#ffe082',
+    fontSize: 24,
+    fontWeight: '800',
+  },
+  statLabel: {
+    color: '#7777aa',
+    fontSize: 12,
+    marginTop: 6,
+  },
+  statsSubtitle: {
+    color: '#9999bb',
+    fontSize: 14,
+    fontWeight: '600',
+    marginBottom: 12,
+    marginTop: 8,
+  },
+  moodHistorySection: {
+    marginTop: 12,
+  },
+  moodRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#1a1a38',
+    borderRadius: 12,
+    padding: 14,
+    marginBottom: 8,
+  },
+  moodEmoji: {
+    fontSize: 24,
+    marginRight: 14,
+  },
+  moodInfo: {
+    flex: 1,
+  },
+  moodTitle: {
+    color: '#e8e0d0',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  moodDate: {
+    color: '#6b6b8a',
+    fontSize: 12,
+    marginTop: 2,
   },
 
   // ===== QUOTE =====
@@ -575,11 +768,11 @@ const styles = StyleSheet.create({
   // ===== FAB =====
   fab: {
     position: 'absolute',
-    bottom: 50,
+    bottom: 115,
     right: 24,
-    width: 56,
-    height: 56,
-    borderRadius: 28,
+    width: 48,
+    height: 48,
+    borderRadius: 24,
     shadowColor: '#ffe082',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.4,
@@ -587,9 +780,9 @@ const styles = StyleSheet.create({
     elevation: 8,
   },
   fabInner: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
+    width: 48,
+    height: 48,
+    borderRadius: 24,
     backgroundColor: '#ffe082',
     alignItems: 'center',
     justifyContent: 'center',

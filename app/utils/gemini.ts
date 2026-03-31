@@ -1,5 +1,5 @@
-const GEMINI_API_KEY = 'AIzaSyCFZgcbcNuLRvsAiDHcUKgf5eyu6Uchouw';
-const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`;
+const OPENROUTER_KEY = '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';
+const API_URL = 'https://openrouter.ai/api/v1/chat/completions';
 
 const SYSTEM_PROMPT = `Sen "Belle" adında bir yapay zeka asistanısın. Güzel ve Çirkin filmindeki Belle gibi nazik, zeki ve kitap sever bir karaktersin.
 
@@ -21,22 +21,25 @@ export interface AIResponse {
 
 export async function analyzeNote(noteText: string): Promise<AIResponse> {
   try {
-    const response = await fetch(GEMINI_URL, {
+    const response = await fetch(API_URL, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${OPENROUTER_KEY}`,
+      },
       body: JSON.stringify({
-        contents: [{
-          parts: [{ text: `${SYSTEM_PROMPT}\n\nKullanıcının notu:\n${noteText}` }]
-        }],
-        generationConfig: {
-          temperature: 0.7,
-          maxOutputTokens: 200,
-        }
+        model: 'google/gemini-2.0-flash-001',
+        messages: [
+          { role: 'system', content: SYSTEM_PROMPT },
+          { role: 'user', content: noteText },
+        ],
+        temperature: 0.7,
+        max_tokens: 200,
       })
     });
 
     const data = await response.json();
-    const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    const text = data.choices?.[0]?.message?.content || '';
     const jsonMatch = text.match(/\{[\s\S]*\}/);
     if (jsonMatch) {
       return JSON.parse(jsonMatch[0]);
