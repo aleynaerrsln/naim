@@ -18,9 +18,9 @@
 
 | Metric | Value |
 |--------|-------|
-| Total Iterations | 15 |
-| Total Weight (kg) | 190 |
-| Total Time (min) | 225 |
+| Total Iterations | 16 |
+| Total Weight (kg) | 205 |
+| Total Time (min) | 240 |
 | Failed Attempts | 0 |
 
 ---
@@ -424,6 +424,32 @@ Iteration 15: Push notification ekle. Menüden hatırlatma gönder butonu.
 **Screenshot:** `[Expo Go'dan ekran görüntüsü ekle]`
 
 **Commit:** `[NAIM: Aleyna Pocket Belle] Added dark/light mode and push notifications - 15kg`
+
+---
+
+### 🏋️ Iteration 16
+
+| Field | Value |
+|-------|-------|
+| Feature | `Camera integration — take photo and attach to note` |
+| Weight | `15 kg` |
+| Tool Used | `Claude Code` |
+| Time | `15 min` |
+| Attempts | `1` |
+| Status | ✅ Success |
+
+**Prompt given to AI:**
+```
+Iteration 16: Kamera entegrasyonu ekle. Yazma ekranında fotoğraf çek
+butonu. Kamera izni iste, çekilen fotoğrafı nota ekle.
+```
+
+**What happened:**
+- expo-image-picker launchCameraAsync ile kamera entegrasyonu eklendi. Yazma ekranında iki buton yan yana: "📸 Fotoğraf Çek" ve "🖼️ Galeriden Seç". Kamera izni isteniyor, çekilen fotoğraf nota ekleniyor.
+
+**Screenshot:** `[Expo Go'dan ekran görüntüsü ekle]`
+
+**Commit:** `[NAIM: Aleyna Pocket Belle] Added camera integration - 15kg`
 
 ---
 

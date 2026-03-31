@@ -281,6 +281,18 @@ export default function App() {
     }
   };
 
+  const takePhoto = async () => {
+    const { granted } = await ImagePicker.requestCameraPermissionsAsync();
+    if (!granted) return;
+    const result = await ImagePicker.launchCameraAsync({
+      quality: 0.7,
+      allowsEditing: true,
+    });
+    if (!result.canceled) {
+      setNoteImage(result.assets[0].uri);
+    }
+  };
+
   const handleSave = async () => {
     if (note.trim()) {
       if (editingId) {
@@ -640,10 +652,15 @@ export default function App() {
             </View>
           )}
 
-          {/* Image Button */}
-          <TouchableOpacity style={styles.imageButton} onPress={pickImage}>
-            <Text style={styles.imageButtonText}>🖼️  Fotoğraf Ekle</Text>
-          </TouchableOpacity>
+          {/* Image Buttons */}
+          <View style={styles.imageButtons}>
+            <TouchableOpacity style={styles.imageButton} onPress={takePhoto}>
+              <Text style={styles.imageButtonText}>📸  Fotoğraf Çek</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.imageButton} onPress={pickImage}>
+              <Text style={styles.imageButtonText}>🖼️  Galeriden Seç</Text>
+            </TouchableOpacity>
+          </View>
 
           {/* Category Select */}
           <View style={styles.writeCatRow}>
@@ -1394,9 +1411,14 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 14,
   },
-  imageButton: {
-    marginHorizontal: 28,
+  imageButtons: {
+    flexDirection: 'row',
+    paddingHorizontal: 28,
     marginTop: 10,
+    gap: 10,
+  },
+  imageButton: {
+    flex: 1,
     paddingVertical: 10,
     borderRadius: 10,
     borderWidth: 1,
