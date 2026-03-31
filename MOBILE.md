@@ -18,9 +18,9 @@
 
 | Metric | Value |
 |--------|-------|
-| Total Iterations | 4 |
-| Total Weight (kg) | 35 |
-| Total Time (min) | 60 |
+| Total Iterations | 5 |
+| Total Weight (kg) | 55 |
+| Total Time (min) | 75 |
 | Failed Attempts | 0 |
 
 ---
@@ -134,6 +134,32 @@ butonu ekle. Hamburger menü ve ayarlar ikonlarını SVG ile modern yap.
 **Screenshot:** `[Expo Go'dan ekran görüntüsü ekle]`
 
 **Commit:** `[NAIM: Aleyna Pocket Belle] Added delete and edit functionality - 10kg`
+
+---
+
+### 🏋️ Iteration 5
+
+| Field | Value |
+|-------|-------|
+| Feature | `Local storage — notes persist after app restart` |
+| Weight | `20 kg` |
+| Tool Used | `Claude Code` |
+| Time | `15 min` |
+| Attempts | `3` |
+| Status | ✅ Success |
+
+**Prompt given to AI:**
+```
+Iteration 5: Notlar kalıcı olsun — uygulama kapansa bile kaybolmasın.
+Local storage ekle.
+```
+
+**What happened:**
+- İlk AsyncStorage denendi, modül bulunamadı. Sonra expo-file-system denendi, kaydetmedi. Son olarak expo-secure-store ile çalıştı. Notlar artık uygulama kapansa bile kalıcı.
+
+**Screenshot:** `[Expo Go'dan ekran görüntüsü ekle]`
+
+**Commit:** `[NAIM: Aleyna Pocket Belle] Added local storage with expo-secure-store - 20kg`
 
 ---
 

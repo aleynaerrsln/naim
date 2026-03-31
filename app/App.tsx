@@ -1,5 +1,6 @@
 import { StatusBar } from 'expo-status-bar';
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import * as SecureStore from 'expo-secure-store';
 import {
   StyleSheet,
   Text,
@@ -44,17 +45,47 @@ const formatTime = () => {
   return `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
 };
 
+const STORAGE_KEY = 'pocket_belle_notes';
+
 export default function App() {
   const [note, setNote] = useState('');
   const [notes, setNotes] = useState<Note[]>([]);
   const [screen, setScreen] = useState<'home' | 'write' | 'view'>('home');
   const [editingId, setEditingId] = useState<string | null>(null);
   const [viewingNote, setViewingNote] = useState<Note | null>(null);
+  const [loaded, setLoaded] = useState(false);
+
+  // Load notes on startup
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const data = await SecureStore.getItemAsync(STORAGE_KEY);
+        if (data) {
+          setNotes(JSON.parse(data));
+        }
+      } catch (e) {
+        console.log('Load error:', e);
+      }
+      setLoaded(true);
+    };
+    load();
+  }, []);
+
+  // Save notes whenever they change
+  useEffect(() => {
+    if (loaded) {
+      SecureStore.setItemAsync(STORAGE_KEY, JSON.stringify(notes)).catch(console.log);
+    }
+  }, [notes, loaded]);
+
+  const saveNotes = useCallback((updatedNotes: Note[]) => {
+    setNotes(updatedNotes);
+  }, []);
 
   const handleSave = () => {
     if (note.trim()) {
       if (editingId) {
-        setNotes(notes.map(n => n.id === editingId
+        saveNotes(notes.map(n => n.id === editingId
           ? { ...n, text: note.trim() }
           : n
         ));
@@ -66,7 +97,7 @@ export default function App() {
           date: formatDate(),
           time: formatTime(),
         };
-        setNotes([newNote, ...notes]);
+        saveNotes([newNote, ...notes]);
       }
       setNote('');
       setScreen('home');
@@ -74,7 +105,7 @@ export default function App() {
   };
 
   const handleDelete = (id: string) => {
-    setNotes(notes.filter(n => n.id !== id));
+    saveNotes(notes.filter(n => n.id !== id));
     if (screen === 'view') setScreen('home');
   };
 
